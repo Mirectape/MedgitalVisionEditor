@@ -1,0 +1,51 @@
+:root {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Regular.ttf");
+}
+
+.font-style-thin {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Thin.ttf");
+}
+
+.font-style-extralight {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-ExtraLight.ttf");
+}
+
+.font-style-light {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Light.ttf");
+}
+
+.font-style-regular {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Regular.ttf");
+}
+
+.font-style-medium {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Medium.ttf");
+}
+
+.font-style-semibold {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-SemiBold.ttf");
+}
+
+.font-style-bold {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Bold.ttf");
+}
+
+.font-style-extrabold {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-ExtraBold.ttf");
+}
+
+.font-style-black {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Black.ttf");
+}
+
+.fa {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Icons/Fa-Regular.otf");
+}
+
+.fas {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Icons/Fa-Solid.otf");
+}
+
+.fal {
+    -unity-font: url("/Assets/UI/Resources/Fonts/Icons/Fa-Light.otf");
+}

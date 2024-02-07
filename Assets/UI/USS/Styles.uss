@@ -1,0 +1,302 @@
+@import url("/Assets/UI/USS/Fonts.uss");
+@import url("/Assets/UI/USS/ColorsDark.uss");
+@import url("/Assets/UI/USS/DefaultComponents.uss");
+/* @import url("unity-theme://default"); */
+
+* {
+    margin: 0;
+    padding: 0;
+    -unity-overflow-clip-box: content-box;
+    font-size: 14px;
+    color: var(--palette-text-light);
+}
+
+.body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: row;
+    position: relative;
+}
+
+Workspace {
+    flex-grow: 1;
+    flex-direction: row;
+    position: relative;
+    border-top-width: 0px;
+    border-bottom-width: 10px;
+    border-left-width: 10px;
+    border-right-width: 0;
+    border-color: var(--palette-primary-bg);
+    margin-top: 62px;
+}
+
+Inspector {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 500px;
+    min-width: 300px;
+    min-height: 300px;
+    position: relative;
+    background-color: var(--palette-secondary-bg);
+}
+
+PerspectiveView, SliceProjectionView, ViewportPanel {
+    flex-grow: 1;
+    position: relative;
+    min-width: 50px;
+    min-height: 50px;
+}
+
+PerspectiveView, SliceProjectionView, ViewportPanel, Inspector {
+    border-radius: 10px;
+    border-width: 1px;
+    border-color: var(--palette-interactive);
+    background-image: url("/Assets/UI/Resources/Images/Elements/border-radius-10.svg");
+    -unity-background-image-tint-color: var(--palette-primary-bg);
+    -unity-slice-bottom: 10;
+    -unity-slice-top: 10;
+    -unity-slice-left: 10;
+    -unity-slice-right: 10;
+}
+
+PerspectiveView:disabled, SliceProjectionView:disabled, ViewportPanel:disabled, Inspector:disabled, Splitter:disabled, SplitterAnchor:disabled  {
+    display: none;
+}
+
+.maximized-panel {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.viewport-panel-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+GroupLayout {
+    flex-grow: 1;
+}
+
+Splitter {
+    background-color: var(--palette-primary-bg);
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+
+Splitter.horizontal {
+    width: 100%;
+    height: 10px;
+    min-height: 10px;
+}
+
+Splitter.vertical {
+    width: 10px;
+    min-width: 10px;
+    height: 100%;
+}
+
+SplitterAnchor {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+SplitterAnchor.vertical {
+    cursor: url("/Assets/UI/Resources/Cursors/aero_ew_l-005.png") 12 0;
+}
+
+SplitterAnchor.horizontal {
+    cursor: url("/Assets/UI/Resources/Cursors/aero_ns_l-005.png") 0 12;
+}
+
+SliceProjectionView {
+    position: relative;
+}
+
+TopBar {
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    height: 62px;
+    max-height: 62px;
+    flex-shrink: 0;
+    overflow: hidden;
+    background-color: var(--palette-primary-bg);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.logo {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    background-image: url("/Assets/UI/Resources/Images/AppIcons/logodark1024.png");
+}
+
+.topbar-controls-group {
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
+TabBar {
+    flex-direction: column;
+    padding: 0 10px;
+    flex-shrink: 0;
+    background-color: var(--palette-primary-bg);
+    justify-content: space-between;
+    margin-top: 62px;
+}
+
+.tabs-container {
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+Tab {
+    font-size: 20px;
+    width: 42px;
+    height: 42px;
+    max-width: 42px;
+    max-height: 42px;
+    margin-bottom: 10px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    color: var(--palette-text-clarification);
+    border-radius: 10px;
+}
+
+Tab:hover {
+    background-color: var(--palette-secondary-bg);
+}
+
+Tab.toggled, Tab.toggled:hover {
+    color: var(--palette-text-primary-acent);
+    background-color: var(--palette-acent-pale);
+}
+
+.grid-ruler {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+}
+
+.grid-ruler .ruler {
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    -unity-overflow-clip-box: padding-box;
+    border-color: white;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    height: 10px;
+}
+
+.grid-ruler .ruler .line {
+    background-color: white;
+    width: 100%;
+    height: 1px;
+}
+
+.grid-ruler-label {
+    font-size: 10px;
+}
+
+.viewport-button__center {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+.viewport-button__expand {
+    position: absolute;
+    top: 65px;
+    left: 15px;
+}
+
+.viewport-group__zoom {
+    position: absolute;
+    top: 115px;
+    left: 15px;
+}
+
+.icon-button, .icon-toggle {
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    max-width: 32px;
+    max-height: 32px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    color: var(--palette-text-light);
+    background-color: var(--palette-primary-bg);
+    border-radius: 3px;
+}
+
+.icon-toggle--toggled {
+    color: var(--palette-text-primary-acent);
+    background-color: var(--palette-acent-pale);
+}
+
+.icon-button:hover, .icon-toggle:hover {
+    background-color: var(--palette-interactive);
+}
+
+.elements-group {
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    padding: 4px 1px 4px 4px;
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: var(--palette-interactive);
+    background-color: var(--palette-primary-bg);
+}
+
+.elements-group .icon-button, .elements-group .icon-toggle {
+    margin-right: 3px;
+}
+
+.elements-group--column {
+    flex-direction: column;
+    padding: 4px 4px 1px;
+}
+
+.elements-group--column .icon-button, .elements-group--column .icon-toggle {
+    margin-right: 0;
+    margin-bottom: 3px;
+}
+
+.slice-projection-slider {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    bottom: 15px;
+    width: 20px;
+}
+
+.slice-projection-slider .unity-base-slider__tracker {
+    right: 9px;
+    left: 9px;
+    background-color: var(--palette-border-pale);
+    border-radius: 1px;
+}
+
+.slice-projection-slider .unity-base-slider__dragger {
+    width: 18px;
+    height: 30px;
+    left: 0;
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: var(--palette-interactive);
+    background-color: var(--palette-border-pale);
+}

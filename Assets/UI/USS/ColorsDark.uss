@@ -1,0 +1,25 @@
+* {
+    --palette-transparent: rgba(1, 1, 1, 0);
+    --palette-acent: rgb(186, 74, 255);
+    --palette-acent-hover: rgb(126, 89, 237);
+    --palette-acent-pale: rgb(52, 35, 62);
+    --palette-secondary-bg: rgb(33, 32, 39);
+    --palette-primary-bg: rgb(38, 37, 44);
+    --palette-interactive: rgb(46, 45, 52);
+    --palette-modal: rgb(50, 51, 56);
+    --palette-interactive-pale: rgb(53, 52, 61);
+    --palette-interactive-hover: rgb(60, 59, 69);
+    --palette-border: rgb(73, 72, 78);
+    --palette-border-pale: rgb(148, 148, 163);
+    --palette-light: rgb(242, 242, 243);
+    --palette-text-green-acent: rgb(45, 202, 114);
+    --palette-text-orange-acent: rgb(255, 125, 82);
+    --palette-text-red-acent: rgb(245, 61, 107);
+    --palette-text-primary-acent: rgb(186, 74, 255);
+    --palette-text-clarification: rgb(108, 108, 132);
+    --palette-text-descr: rgb(148, 148, 163);
+    --palette-text-base: rgb(200, 200, 208);
+    --palette-text-light: rgb(242, 242, 243);
+    --unity-cursor-color: var(--palette-text-light);
+    --unity-selection-color: var(--palette-acent-pale);
+}

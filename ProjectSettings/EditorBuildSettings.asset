@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/SplashScreen.unity
+    guid: 34a42d773dcd59a4db4788a42d92fea9
+  - enabled: 1
+    path: Assets/Scenes/Main.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: 6f969194f69ea04419a60b3e518bfc5b, type: 2}
+    com.unity.input.settings: {fileID: 11400000, guid: 80e519a7b9c9a3442a35c6403f7784dd, type: 2}
+    com.unity.localization.addressable-group-rules: {fileID: 11400000, guid: c4bb67a9a4f065f4b82bd9e050518bde, type: 2}
+    com.unity.localization.settings: {fileID: 11400000, guid: bac9611348a688a4a857660420fc551f, type: 2}
