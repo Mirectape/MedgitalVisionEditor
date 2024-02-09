@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>SimpleITK-win64-CSharp-x64</id>
+    <version>1.0.0.1</version>
+    <title>SimpleITK 1.0.0 (64bit)</title>
+    <authors>Sebastian Widz</authors>
+    <owners>SimpleITK</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>https://itk.org/Wiki/ITK_Release_4/Licensing</licenseUrl>
+    <projectUrl>http://www.simpleitk.org/</projectUrl>
+    <description>SimpleITK is an image analysis toolkit with a large number of components supporting general filtering operations, image segmentation and registration. It is built on top of the Insight Segmentation and Registration Toolkit ITK with the intent of providing a simplified interface to ITK. SimpleITK itself is written in C++ but is available for a large number of programming languages. Currently these include: Python, R, Java, C#, Lua, TCL, Ruby. Wrapping of the C++ code is accomplished through SWIG, in principle, any language wrapped by SWIG should be applicable to SimpleITK. Unlike ITK's support of n-dimensional spatio-temporal images, SimpleITK supports 2D, 3D and optionally 3D+time. The dimensionality refers to spatio-temporal dimensions, the voxels can be n-dimensional vectors. SimpleITK is licensed under the Apache License in the same way as ITK.
+		
+		I am not the author of this package. Please read http://www.simpleitk.org/ for more details.</description>
+    <summary>Insight Segmentation and Registration Toolkit (64bit)</summary>
+    <releaseNotes>https://github.com/SimpleITK/SimpleITK/releases</releaseNotes>
+    <copyright>Copyright 1999-2017 Insight Software Consortium</copyright>
+    <tags>simpleITK registration image-analysis segmentation image-processing itk</tags>
+    <references>
+      <reference file="SimpleITKCSharpManaged.dll" />
+    </references>
+  </metadata>
+</package>

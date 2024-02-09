@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata>
+    <id>fo-dicom.Codecs</id>
+    <version>5.11.0</version>
+    <title>fo-dicom Codecs</title>
+    <authors>Efferent-Health,fo-dicom</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>http://opensource.org/licenses/MS-PL</licenseUrl>
+    <projectUrl>https://github.com/Efferent-Health/fo-dicom-codecs</projectUrl>
+    <description>Cross-platform Dicom codecs for fo-dicom</description>
+    <language>en-US</language>
+    <dependencies>
+      <dependency id="NETStandard.Library" version="2.0.0" />
+    </dependencies>
+  </metadata>
+</package>
