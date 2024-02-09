@@ -695,7 +695,22 @@ PlayerSettings:
   webGLMemoryGeometricGrowthStep: 0.2
   webGLMemoryGeometricGrowthCap: 96
   webGLPowerPreference: 2
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Android: CT_PROC;CT_FB
+    EmbeddedLinux: CT_PROC;CT_FB
+    GameCoreXboxOne: CT_PROC;CT_FB
+    Nintendo Switch: CT_PROC;CT_FB
+    PS4: CT_PROC;CT_FB
+    PS5: CT_PROC;CT_FB
+    QNX: CT_PROC;CT_FB
+    Stadia: CT_PROC;CT_FB
+    Standalone: CT_PROC;CT_FB
+    VisionOS: CT_PROC;CT_FB
+    WebGL: CT_PROC;CT_FB
+    Windows Store Apps: CT_PROC;CT_FB
+    XboxOne: CT_PROC;CT_FB
+    iPhone: CT_PROC;CT_FB
+    tvOS: CT_PROC;CT_FB
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

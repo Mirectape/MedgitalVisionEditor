@@ -6,7 +6,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using FellowOakDicom;
-using Dicom;
 using openDicom.DataStructure.DataSet;
 using UnityEngine;
 using itk.simple;
@@ -80,13 +79,13 @@ public class DataManager : MonoBehaviour
 
     private void Start()
     {
-        //FindSeries();
+        FindSeries();
     }
 
     public static void FindSeries()
     {
-        //Crosstales.FB.FileBrowser.Instance.OpenFoldersAsync(Instance.FindDicomSeriesByPath,
-        //    "Выберите папку с расположением dicom", "", false);
+        Crosstales.FB.FileBrowser.Instance.OpenFoldersAsync(Instance.FindDicomSeriesByPath,
+            "Выберите папку с расположением dicom", "", false);
     }
 
     private async void FindDicomSeriesByPath(string[] itemWithStreams)

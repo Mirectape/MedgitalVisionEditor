@@ -132,7 +132,6 @@ public class CameraTransformController : MonoBehaviour
     
     private void OnPanStarted(InputAction.CallbackContext context)
     {
-        Debug.Log(context.control.displayName);
         if (context.control.displayName != "Position" && context.control.displayName != "Delta")
         {
             _startScreenToWorldPoint = context.ReadValue<Vector2>();
