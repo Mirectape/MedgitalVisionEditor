@@ -16,7 +16,7 @@ namespace UI.Components
         
         #endregion
         
-        public IconButton(string icon, Action action) : base(action)
+        public IconButton(Action action, string icon) : base(action)
         {
             this.text = icon;
             this.AddToClassList(_iconRegularStyle);

@@ -53,6 +53,7 @@ public class CameraTransformController : MonoBehaviour
     
         _panAction.Enable();
         _zoomAction.Enable();
+        
         _rotateAction.Enable();
         _generalAction.Enable();
     }

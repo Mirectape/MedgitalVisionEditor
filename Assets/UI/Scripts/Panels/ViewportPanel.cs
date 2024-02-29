@@ -75,9 +75,8 @@ namespace UI
             groupCenter.AddToClassList(_centerButtonStyle);
             _content.Add(groupCenter);
             
-            IconButton centerBtn = new IconButton("\ue4be", () => Debug.Log("CenterButton"));
+            IconButton centerBtn = new IconButton(() => Debug.Log("CenterButton"), "\ue4be");
             groupCenter.Add(centerBtn);
-            
             
             VisualElement groupExpand = new VisualElement();
             groupExpand.AddToClassList(_elementsGroupStyle);
@@ -98,10 +97,10 @@ namespace UI
             groupZoom.AddToClassList(_groupZoomStyle);
             _content.Add(groupZoom);
             
-            IconButton plusBtn = new IconButton("\u002b", () => Debug.Log("ZoomUp"));
+            IconButton plusBtn = new IconButton(() => Debug.Log("ZoomUp"), "\u002b");
             groupZoom.Add(plusBtn);
             
-            IconButton minusBtn = new IconButton("\uf068", () => Debug.Log("ZoomDown"));
+            IconButton minusBtn = new IconButton(() => Debug.Log("ZoomDown"), "\uf068");
             groupZoom.Add(minusBtn);
         }
 
