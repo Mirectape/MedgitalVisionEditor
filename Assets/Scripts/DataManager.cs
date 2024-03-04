@@ -12,9 +12,10 @@ using itk.simple;
 
 public enum ScanOrder
 {
-    AxialIS = 0, AxialSI = 1,
-    SagittalLR = 2, SagittalRL = 3,
-    CoronalPA = 4, CoronalAP = 5
+    Unknown = 0,
+    AxialIS = 1, AxialSI = 2,
+    SagittalLR = 3, SagittalRL = 4,
+    CoronalPA = 5, CoronalAP = 6, 
 }
 
 public class DataManager : MonoBehaviour
@@ -65,16 +66,16 @@ public class DataManager : MonoBehaviour
                 Debug.Log(i.patientName + " " + i.seriesUID);
             }
 
-            LoadDicomSeries(_seriesInfos[0].seriesUID); //??? only testing sample chosen
+            LoadDicomSeries(_seriesInfos[0].seriesUID);
         };
-        OnSeriesNotFound += () => { Debug.Log("Series are not found"); };
-        OnStartDataLoad += () => { Debug.Log("Start loading..."); };
+        OnSeriesNotFound += () => { Debug.Log("Series not found"); };
+        OnStartDataLoad += () => { Debug.Log("Start load"); };
         OnFinishDataLoad += () =>
         {
-            Debug.Log("Loading is finished!"); 
+            Debug.Log("Finish load"); 
         };
-        OnSeriesErrorLoad += (e) => { Debug.Log("Series exception: " + e); };
-        OnDataErrorLoad += (e) => { Debug.Log("Data exception: " + e); };
+        OnSeriesErrorLoad += (e) => { Debug.Log("Series exteprion" + e); };
+        OnDataErrorLoad += (e) => { Debug.Log("Data exteprion" + e); };
     }
 
     private void Start()
@@ -96,11 +97,11 @@ public class DataManager : MonoBehaviour
             return;
         }
         
-        _seriesInfos.Clear(); //???
+        _seriesInfos.Clear();
 
         try
         {
-            await FindDicomSeries(itemWithStreams[0]); //???
+            await FindDicomSeries(itemWithStreams[0]);
         }
         catch (Exception e)
         {
@@ -117,7 +118,7 @@ public class DataManager : MonoBehaviour
     {
         foreach (var subDir in Directory.GetDirectories(dir))
         {
-            await FindDicomSeries(subDir); //for opening sub-folders
+            await FindDicomSeries(subDir);
         }
 
         var seriesIDs = ImageSeriesReader.GetGDCMSeriesIDs(dir);
@@ -126,9 +127,9 @@ public class DataManager : MonoBehaviour
             var dicomNames = ImageSeriesReader.GetGDCMSeriesFileNames(dir, seriesID);
             if (dicomNames.Count > 0)
             {
-                var dicomFile = DicomFile.Open(dicomNames[0]); //[0] because information on seriesID is the same for all files
+                var dicomFile = DicomFile.Open(dicomNames[0]);
 
-                var seriesInfo = new SeriesInfo // what series we have 
+                var seriesInfo = new SeriesInfo
                 {
                     seriesUID = seriesID,
                     patientName = dicomFile.Dataset.GetString(DicomTag.PatientName),
@@ -160,7 +161,7 @@ public class DataManager : MonoBehaviour
                     }
                 }
                 
-                _seriesInfos.Add(seriesInfo); //??? - question about volumeRenderingLoading
+                _seriesInfos.Add(seriesInfo);
             }
         }
     }
@@ -173,7 +174,7 @@ public class DataManager : MonoBehaviour
             try
             {
                 OnStartDataLoad?.Invoke();
-                var dicomNames = ImageSeriesReader.GetGDCMSeriesFileNames(seriesInfo.dirPath, seriesID); //???
+                var dicomNames = ImageSeriesReader.GetGDCMSeriesFileNames(seriesInfo.dirPath, seriesID);
                 var reader = new ImageSeriesReader();
                 reader.SetFileNames(dicomNames);
                 _mainImage = reader.Execute();
@@ -185,10 +186,7 @@ public class DataManager : MonoBehaviour
                 {
                     var dicomFile = DicomFile.Open(dicomName);
 
-                    if (_fullMetadataDataset == null) 
-                    { 
-                        _fullMetadataDataset = dicomFile.Dataset; 
-                    }
+                    if (_fullMetadataDataset == null) _fullMetadataDataset = dicomFile.Dataset;
                     
                     // Extract DICOM tags to our metadata class
                     var dicomMetadata = new DicomSliceMetadata();
@@ -207,9 +205,43 @@ public class DataManager : MonoBehaviour
                     _slicesMetadata.Add(dicomMetadata);
                 }
 
-                CalculateOrder();
+                /*
+                CalculateOrder1();
+
+                //var position = dataset.GetValues<double>(DicomTag.ImagePositionPatient);
+                //var spacing = dataset.GetValues<double>(DicomTag.PixelSpacing);
+                //var sliceThickness = dataset.GetValue<double>(DicomTag.SliceThickness, 0);
+
+                Debug.Log("Image Orientation (Patient): " + string.Join(", ", orientation));
+                Debug.Log("zOrientation: " + string.Join(", ", zOrientation));
+                Debug.Log("Image Position (Patient): " + string.Join(", ", position));
+                Debug.Log("Pixel Spacing: " + string.Join(", ", spacing));
+                Debug.Log("Slice Thickness: " + string.Join(", ", sliceThickness));
+
+                Matrix4x4 ijkToRAS = Matrix4x4.identity;
+
+                ijkToRAS.SetRow(0, new Vector4(xOrientation.x * (float)spacing[0], xOrientation.y * (float)spacing[1], xOrientation.z * (float)sliceThickness, (float)position[0]));
+                ijkToRAS.SetRow(1, new Vector4(yOrientation.x * (float)spacing[0], yOrientation.y * (float)spacing[1], yOrientation.z * (float)sliceThickness, (float)position[1]));
+                ijkToRAS.SetRow(2, new Vector4(zOrientation.x * (float)spacing[0], zOrientation.y * (float)spacing[1], zOrientation.z * (float)sliceThickness, (float)position[2]));
+                */
+
+                var dataset = DicomFile.Open(dicomNames[0]).Dataset;
                 
-                OnFinishDataLoad?.Invoke(); // here we construct 3d polygon image via volumeRendering
+                var orientation = dataset.GetValues<double>(DicomTag.ImageOrientationPatient);
+                
+                Vector3 xOrientation = new Vector3((float)orientation[0], (float)orientation[1], (float)orientation[2]);
+                Vector3 yOrientation = new Vector3((float)orientation[3], (float)orientation[4], (float)orientation[5]);
+                Vector3 zOrientation = Vector3.Cross(xOrientation, yOrientation);
+                
+                Matrix4x4 ijkToRAS = Matrix4x4.identity;
+                ijkToRAS.SetColumn(0, new Vector4(xOrientation.x, xOrientation.y, xOrientation.z, 0));
+                ijkToRAS.SetColumn(1, new Vector4(yOrientation.x, yOrientation.y, yOrientation.z, 0));
+                ijkToRAS.SetColumn(2, new Vector4(zOrientation.x, zOrientation.y, zOrientation.z, 0));
+
+                var scanOrder = ComputeScanOrderFromIJKToRAS(ijkToRAS);
+                Debug.Log("Scan Order: " + scanOrder);
+
+                OnFinishDataLoad?.Invoke();
             }
             catch (Exception e)
             {
@@ -217,11 +249,85 @@ public class DataManager : MonoBehaviour
             }
         }
     }
+    
+    private void CalculateOrder1()
+    {
+        var image = _mainImage; // _mainImage является объектом itk.simple.Image
 
+        // Получаем ориентацию изображения
+        var direction = image.GetDirection();
+        // Получаем позицию изображения
+        var origin = image.GetOrigin();
+        // Получаем масштабирование пикселей
+        var spacing = image.GetSpacing();
+
+        // Создаем матрицу преобразования с учетом этих данных
+        Matrix4x4 ijkToRAS = Matrix4x4.identity;
+
+        /*
+        // Установка ориентации и масштабирования
+        ijkToRAS.SetColumn(0, new Vector4((float)direction[0] * (float)spacing[0], (float)direction[3] * (float)spacing[1], (float)direction[6] * (float)spacing[2], 0));
+        ijkToRAS.SetColumn(1, new Vector4((float)direction[1] * (float)spacing[0], (float)direction[4] * (float)spacing[1], (float)direction[7] * (float)spacing[2], 0));
+        ijkToRAS.SetColumn(2, new Vector4((float)direction[2] * (float)spacing[0], (float)direction[5] * (float)spacing[1], (float)direction[8] * (float)spacing[2], 0));
+        // Установка позиции
+        ijkToRAS.SetColumn(3, new Vector4((float)origin[0], (float)origin[1], (float)origin[2], 1));
+        */
+        
+        // Установка ориентации и масштабирования
+        ijkToRAS.SetRow(0, new Vector4((float)direction[0] * (float)spacing[0], (float)direction[1] * (float)spacing[1], (float)direction[2] * (float)spacing[2], 0));
+        ijkToRAS.SetRow(1, new Vector4((float)direction[3] * (float)spacing[0], (float)direction[4] * (float)spacing[1], (float)direction[5] * (float)spacing[2], 0));
+        ijkToRAS.SetRow(2, new Vector4((float)direction[6] * (float)spacing[0], (float)direction[7] * (float)spacing[1], (float)direction[8] * (float)spacing[2], 0));
+
+        // Установка позиции
+        ijkToRAS.SetRow(3, new Vector4((float)origin[0], (float)origin[1], (float)origin[2], 1));
+
+        // Вывод полученных данных для демонстрации
+        Debug.Log("Image Orientation (Patient): " + string.Join(", ", direction));
+        Debug.Log("Image Position (Patient): " + string.Join(", ", origin));
+        Debug.Log("Pixel Spacing: " + string.Join(", ", spacing));
+        
+        // Вычисление порядка сканирования из матрицы IJK to RAS
+        var scanOrder = ComputeScanOrderFromIJKToRAS(ijkToRAS);
+        Debug.Log("Scan Order: " + scanOrder);
+    }
+    
+    public string ComputeScanOrderFromIJKToRAS(Matrix4x4 ijkToRAS)
+    {
+        Vector3 dir = new Vector3(0, 0, 1); // Аналог dir[4]={0,0,1,0};
+        var kvec = ijkToRAS.MultiplyPoint(dir);
+
+        int maxComp = 0;
+        float max = Mathf.Abs(kvec[0]);
+
+        for (int i = 1; i < 3; i++)
+        {
+            if (Mathf.Abs(kvec[i]) > max)
+            {
+                max = Mathf.Abs(kvec[i]);
+                maxComp = i;
+            }
+        }
+        
+        Debug.Log($"maxComp: {maxComp.ToString()}");  
+        Debug.Log($"max after: {max.ToString()}");  
+
+        switch (maxComp)
+        {
+            case 0:
+                return kvec[maxComp] > 0 ? ScanOrder.SagittalRL.ToString() : ScanOrder.SagittalLR.ToString();
+            case 1:
+                return kvec[maxComp] > 0 ? ScanOrder.CoronalAP.ToString() : ScanOrder.CoronalPA.ToString();
+            case 2:
+                return kvec[maxComp] > 0 ? ScanOrder.AxialIS.ToString() : ScanOrder.AxialSI.ToString();
+            default:
+                Debug.LogError("Max component not in valid range 0,1,2");
+                return "";
+        }
+    }
+    
     private void CalculateOrder()
     {
         Vector3 corner = GetOriginCornerDirection();
-        
         
         // 0.0005f epsilon to eliminate floating point error
         corner = new Vector3(
@@ -239,8 +345,6 @@ public class DataManager : MonoBehaviour
             Debug.LogError("Can't calculate order. Size is zero on all axies");
             Order = ScanOrder.AxialIS;
         }
-
-        Debug.Log(Order.ToString());
 
         if (corner.x != 0 && corner.y != 0 || corner.x != 0 && corner.z != 0 || corner.y != 0 && corner.z != 0)
         {

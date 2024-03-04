@@ -143,6 +143,7 @@ TopBar {
 .topbar-controls-group {
     flex-grow: 1;
     justify-content: space-between;
+    align-items: center;
 }
 
 TabBar {
@@ -230,7 +231,7 @@ Tab.toggled, Tab.toggled:hover {
 }
 
 .icon-button, .icon-toggle {
-    font-size: 18px;
+    font-size: 16px;
     width: 32px;
     height: 32px;
     max-width: 32px;
@@ -247,14 +248,53 @@ Tab.toggled, Tab.toggled:hover {
     background-color: var(--palette-acent-pale);
 }
 
-.icon-button:hover, .icon-toggle:hover {
+.icon-button:hover, .icon-toggle:hover, .popup-menu__item:hover, .custom-button:hover {
     background-color: var(--palette-interactive);
+}
+
+.custom-button {
+    height: 32px;
+    max-height: 32px;
+    padding: 5px 10px;
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    justify-content: center;
+    border-radius: 3px;
+    color: var(--palette-text-light);
+    background-color: var(--palette-primary-bg);
+    overflow: hidden;
+}
+
+.custom-button__title {
+    font-size: 14px;
+    height: 22px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+
+.custom-button__icon {
+    font-size: 16px;
+    width: 22px;
+    height: 22px;
+    margin-right: 5px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+
+.custom-button--accent {
+    background-color: var(--palette-acent-pale);
+}
+
+.custom-button--accent Label{
+    color: var(--palette-text-primary-acent);
 }
 
 .elements-group {
     display: flex;
     flex-direction: row;
     flex-shrink: 0;
+    align-items: center;
     padding: 4px 1px 4px 4px;
     border-radius: 5px;
     border-width: 1px;
@@ -299,4 +339,66 @@ Tab.toggled, Tab.toggled:hover {
     border-width: 1px;
     border-color: var(--palette-interactive);
     background-color: var(--palette-border-pale);
+}
+
+.popup-menu__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.popup-menu__menu {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: 10px;
+    background-color: var(--palette-primary-bg);
+    border-radius: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.popup-menu__item {
+    align-items: center;
+    height: 42px;
+    max-height: 42px;
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    background-color: var(--palette-primary-bg);
+    border-radius: 3px;
+    padding: 5px;
+}
+
+.popup-menu__item .item__title {
+    font-size: 16px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.popup-menu__item .item__icon {
+    font-size: 18px;
+    width: 32px;
+    height: 32px;
+    max-width: 32px;
+    max-height: 32px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    color: var(--palette-text-light);
+}
+
+.loader {
+    width: 60px;
+    height: 10.8px;
+    margin-left: 10px;
+    margin-right: 10px;
+    opacity: 0;
+    transition: opacity 150ms ease; 
+}
+
+.loader--show {
+    opacity: 1;
 }

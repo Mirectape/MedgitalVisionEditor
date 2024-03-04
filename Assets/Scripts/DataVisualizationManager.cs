@@ -86,7 +86,7 @@ public class DataVisualizationManager : MonoBehaviour
         float[] buffer = new float[size];
         Marshal.Copy(floatImage.GetBufferAsFloat(), buffer, 0, size);
 
-        NativeArray<ushort> pixelBytes = new NativeArray<ushort>(size, Allocator.Persistent); //DOTS!!!
+        NativeArray<ushort> pixelBytes = new NativeArray<ushort>(size, Allocator.Persistent);
 
         StatisticsImageFilter statisticsFilter = new StatisticsImageFilter();
         statisticsFilter.Execute(floatImage);
@@ -135,7 +135,6 @@ public class DataVisualizationManager : MonoBehaviour
        meshContainer.localPosition = Vector3.zero;
        meshContainer.parent = outerObject;
    } 
-
    private void SetMeshScale(UnityEngine.Transform meshContainer)
    {
        // Устанавливаем масштаб сетки на основе размеров изображения

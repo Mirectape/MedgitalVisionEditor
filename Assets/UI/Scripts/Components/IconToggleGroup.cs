@@ -21,9 +21,9 @@ namespace UI.Components
             this.AddToClassList(_elementsGroupStyle);
         }
 
-        public IconToggleGroup AddToggle(string icon, Action action, bool initialState = false)
+        public IconToggleGroup AddToggle(Action action, string icon, bool initialState = false)
         {
-            IconButton button = new IconButton(icon, action);
+            IconButton button = new IconButton(action, icon);
             button.clicked += () => ButtonClicked(button);
             _buttons.Add(button);
             this.Add(button);

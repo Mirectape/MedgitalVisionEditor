@@ -268,6 +268,24 @@ namespace UnityVolumeRendering
                             }
                         }
                     });
+                    
+                    //// Start texture (0 0 0) voxel
+
+                    int cubeSize = 20;
+                    
+                    for (int z = 0; z < cubeSize;z++)
+                    {
+                        for (int y = 0; y < cubeSize; y++)
+                        {
+                            for (int x = 0; x < cubeSize; x++)
+                            {
+                                pixelBytes[x + y * dimX + z * dimX * dimY] = Mathf.FloatToHalf((float)(maxValue - minValue) / maxRange);
+                            }
+                        }
+                    }
+                    
+                    ////
+                    
                     progressHandler.EndStage();
                     progressHandler.ReportProgress(0.8f, "Applying texture");
 

@@ -1,51 +1,51 @@
 :root {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Regular.ttf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter-Regular.ttf");
 }
 
 .font-style-thin {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Thin.ttf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter-Thin.ttf");
 }
 
 .font-style-extralight {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-ExtraLight.ttf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter-ExtraLight.ttf");
 }
 
 .font-style-light {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Light.ttf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter-Light.ttf");
 }
 
 .font-style-regular {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Regular.ttf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter-Regular.ttf");
 }
 
 .font-style-medium {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Medium.ttf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter-Medium.ttf");
 }
 
 .font-style-semibold {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-SemiBold.ttf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter-SemiBold.ttf");
 }
 
 .font-style-bold {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Bold.ttf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter-Bold.ttf");
 }
 
 .font-style-extrabold {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-ExtraBold.ttf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter-ExtraBold.ttf");
 }
 
 .font-style-black {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Inter/Inter-Black.ttf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Inter-Black.ttf");
 }
 
 .fa {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Icons/Fa-Regular.otf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Fa-Regular.otf");
 }
 
 .fas {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Icons/Fa-Solid.otf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Fa-Solid.otf");
 }
 
 .fal {
-    -unity-font: url("/Assets/UI/Resources/Fonts/Icons/Fa-Light.otf");
+    -unity-font: url("/Assets/UI/Resources/Fonts/Fa-Light.otf");
 }

@@ -27,9 +27,9 @@ namespace UI
             VisualElement undoRedoGroup = new VisualElement();
             undoRedoGroup.AddToClassList(_elementsGroupStyle);
             controls.Add(undoRedoGroup);
-            IconButton undoBtn = new IconButton("\uf060", () => Debug.Log("Undo"));
+            IconButton undoBtn = new IconButton(() => Debug.Log("Undo"), "\uf060");
             undoRedoGroup.Add(undoBtn);
-            IconButton redoBtn = new IconButton("\uf061", () => Debug.Log("Redo"));
+            IconButton redoBtn = new IconButton(() => Debug.Log("Redo"), "\uf061");
             undoRedoGroup.Add(redoBtn);
             undoRedoGroup.style.marginRight = 15;
             
@@ -37,14 +37,32 @@ namespace UI
             IconToggleGroup cameraControlGroup = new IconToggleGroup();
             controls.Add(cameraControlGroup);
             cameraControlGroup
-                .AddToggle("\uf245", () => CameraTransformController.Instance.SetControlAction(ControlInputAction.Cursor), true)
-                .AddToggle("\uf047", () => CameraTransformController.Instance.SetControlAction(ControlInputAction.Pan))
-                .AddToggle("\uf021", () => CameraTransformController.Instance.SetControlAction(ControlInputAction.Rotate))
-                .AddToggle("\uf002", () => CameraTransformController.Instance.SetControlAction(ControlInputAction.Zoom));
+                .AddToggle(
+                    () => CameraTransformController.Instance.SetControlAction(ControlInputAction.Cursor),
+                    "\uf245", true)
+                .AddToggle( 
+                    () => CameraTransformController.Instance.SetControlAction(ControlInputAction.Pan),
+                    "\uf047")
+                .AddToggle(
+                    () => CameraTransformController.Instance.SetControlAction(ControlInputAction.Rotate),
+                    "\uf021")
+                .AddToggle(
+                    () => CameraTransformController.Instance.SetControlAction(ControlInputAction.Zoom),
+                    "\uf002");
 
+            Loader ase = new Loader();
+            
             //
             VisualElement group = new VisualElement();
+            group.AddToClassList(_elementsGroupStyle);
+            AccentButton cb = new AccentButton(() => ase.Show(), "Кнопочка", "\uf007");
+            IconButton cb1 = new IconButton(() => ase.Hide(),"\uf078");
+            group.Add(cb);
+            group.Add(cb1);
             controls.Add(group);
+            
+            ase.Show();
+            controls.Add(ase);
             
             //Logo
             Image logo = new Image();
