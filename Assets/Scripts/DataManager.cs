@@ -44,7 +44,7 @@ public class DataManager : MonoBehaviour
     #region Delegates/Events
     
     public delegate void DataHandler();
-    public static event DataHandler OnSeriesFound;  
+    public static event DataHandler OnSeriesFound;
     public static event DataHandler OnSeriesNotFound; 
     public static event DataHandler OnStartDataLoad; 
     public static event DataHandler OnFinishDataLoad; 

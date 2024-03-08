@@ -8,4 +8,5 @@ public class SelectedDicomSliceMetadata
     public string SOPInstanceUID { get; set; } //(0008,0018)
     public int InstanceNumber { get; set; } //(0020,0013)
     public Vector3 ImagePositionPatient { get; set; } //(0020,0032)
+    public DicomSliceOrder DicomSliceOrder { get; set; }
 }

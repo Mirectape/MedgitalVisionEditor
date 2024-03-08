@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using FellowOakDicom;
 using UnityEngine;
 using itk.simple;
-using UnityEngine.UI;
+using System.Text;
 
 public class DicomDataHandler : MonoBehaviour
 {
-    public static DicomDataHandler Instance {  get; private set; }
+    public static DicomDataHandler Instance { get; private set; }
 
     public static itk.simple.Image MainImage => Instance._mainImage;
     public static List<SeriesInfo> SeriesInfos => Instance._seriesInfos;
@@ -29,7 +29,7 @@ public class DicomDataHandler : MonoBehaviour
 
     private void Awake()
     {
-        if(Instance == null)
+        if (Instance == null)
         {
             Instance = this;
         }
@@ -38,7 +38,7 @@ public class DicomDataHandler : MonoBehaviour
             Destroy(gameObject);
         }
 
-        OnSeriesFound += (sender, args) => 
+        OnSeriesFound += (sender, args) =>
         {
             foreach (var i in _seriesInfos)
             {
@@ -50,6 +50,7 @@ public class DicomDataHandler : MonoBehaviour
         OnDataLoaded += (sender, args) =>
         {
             Debug.Log("Loading is finished!");
+            DefineMainImageOrientation();
         };
     }
 
@@ -71,7 +72,7 @@ public class DicomDataHandler : MonoBehaviour
 
         try
         {
-            await FindDicomSeries(itemWithStreams[0]); //the first folder 
+            await ExtractDicomSeriesInfo(itemWithStreams[0]); //the first folder 
         }
         catch (Exception e)
         {
@@ -88,11 +89,11 @@ public class DicomDataHandler : MonoBehaviour
         }
     }
 
-    private async Task FindDicomSeries(string dir)
+    private async Task ExtractDicomSeriesInfo(string dir)
     {
         foreach (var subDir in Directory.GetDirectories(dir))
         {
-            await FindDicomSeries(subDir); //for opening sub-folders
+            await ExtractDicomSeriesInfo(subDir); //for opening sub-folders
         }
 
         var seriesIDs = ImageSeriesReader.GetGDCMSeriesIDs(dir);
@@ -135,7 +136,7 @@ public class DicomDataHandler : MonoBehaviour
                     }
                 }
 
-                _seriesInfos.Add(seriesInfo); 
+                _seriesInfos.Add(seriesInfo);
             }
         }
     }
@@ -149,7 +150,7 @@ public class DicomDataHandler : MonoBehaviour
             {
                 Debug.Log("Start loading...");
                 var reader = new ImageSeriesReader();
-                var dicomNames = ImageSeriesReader.GetGDCMSeriesFileNames(seriesInfo.dirPath, seriesID); 
+                var dicomNames = ImageSeriesReader.GetGDCMSeriesFileNames(seriesInfo.dirPath, seriesID);
                 reader.SetFileNames(dicomNames);
                 _mainImage = reader.Execute();
 
@@ -170,7 +171,7 @@ public class DicomDataHandler : MonoBehaviour
 
                     if (dicomFile.Dataset.Contains(DicomTag.ImagePositionPatient))
                     {
-                        dicomMetadata.ImagePositionPatient = ParseDicomPosition(dicomFile.Dataset.GetString(DicomTag.ImagePositionPatient));                 
+                        dicomMetadata.ImagePositionPatient = ParseDicomPosition(dicomFile.Dataset.GetString(DicomTag.ImagePositionPatient));
                     }
                     if (dicomFile.Dataset.Contains(DicomTag.InstanceNumber))
                     {
@@ -184,13 +185,96 @@ public class DicomDataHandler : MonoBehaviour
                     _selectedSlicesMetadata.Add(dicomMetadata);
                 }
 
-                OnDataLoaded?.Invoke(this, new EventArgs());
+                OnDataLoaded?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception e)
             {
                 Debug.Log("Data exception: " + e);
             }
         }
+    }
+
+    private void DefineMainImageOrientation()
+    {
+        var firstSlice = _selectedSlicesMetadata[0].ImagePositionPatient;
+        var secondSlice = _selectedSlicesMetadata[1].ImagePositionPatient;
+        var sliceDirectionVector = secondSlice - firstSlice; //(R,A,S)
+        bool isNormalized = IsNormalized(sliceDirectionVector);
+
+        if (isNormalized)
+        {
+            if (Math.Abs(sliceDirectionVector.x) == 1) //Sagittal
+            {
+                if (sliceDirectionVector.x > 0) // from left to right in RAS sys value is to be positive 
+                {
+                    foreach (var slice in _selectedSlicesMetadata)
+                    {
+                        slice.DicomSliceOrder = DicomSliceOrder.LR;
+                    }
+                }
+                else if (sliceDirectionVector.x < 0)
+                {
+                    foreach (var slice in _selectedSlicesMetadata)
+                    {
+                        slice.DicomSliceOrder = DicomSliceOrder.RL;
+                    }
+                }
+            }
+            else //Coronal or Axial or RotatedOrder
+            {
+                if (Math.Abs(sliceDirectionVector.y) == 1) //Coronal
+                {
+                    if (sliceDirectionVector.y > 0) // from posterior to anterior in RAS sys value is to be postitive
+                    {
+                        foreach (var slice in _selectedSlicesMetadata)
+                        {
+                            slice.DicomSliceOrder = DicomSliceOrder.PA;
+                        }
+                    }
+                    else if (sliceDirectionVector.y < 0)
+                    {
+                        foreach (var slice in _selectedSlicesMetadata)
+                        {
+                            slice.DicomSliceOrder = DicomSliceOrder.AP;
+                        }
+                    }
+                }
+                else if(Math.Abs(sliceDirectionVector.z) == 1)//Axial
+                {
+                    if (sliceDirectionVector.z > 0) // from inferior to superior in RAS sys value is to be postitive
+                    {
+                        foreach (var slice in _selectedSlicesMetadata)
+                        {
+                            slice.DicomSliceOrder = DicomSliceOrder.IS;
+                        }
+                    }
+                    else if (sliceDirectionVector.z < 0)
+                    {
+                        foreach (var slice in _selectedSlicesMetadata)
+                        {
+                            slice.DicomSliceOrder = DicomSliceOrder.SI;
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var slice in _selectedSlicesMetadata)
+                    {
+                        slice.DicomSliceOrder = DicomSliceOrder.RotatedOreder;
+                    }
+                }
+            }
+        }
+        else 
+        {
+            foreach (var slice in _selectedSlicesMetadata)
+            {
+                slice.DicomSliceOrder = DicomSliceOrder.UnknownOrder;
+            }
+        }
+        Debug.Log(_selectedSlicesMetadata[0].ImagePositionPatient);
+        Debug.Log(_selectedSlicesMetadata[1].ImagePositionPatient);
+        Debug.Log(_selectedSlicesMetadata[0].DicomSliceOrder);
     }
 
     private Vector3 ParseDicomPosition(string dicomPositionString)
@@ -207,6 +291,11 @@ public class DicomDataHandler : MonoBehaviour
         float z = float.Parse(parts[2], CultureInfo.InvariantCulture);
 
         return new Vector3(x, y, z);
+    }
+
+    bool IsNormalized(Vector3 vector)
+    {
+        return Mathf.Approximately(vector.magnitude, 1f);
     }
 }
 
