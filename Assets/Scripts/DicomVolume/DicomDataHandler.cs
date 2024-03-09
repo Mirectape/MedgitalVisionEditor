@@ -181,6 +181,10 @@ public class DicomDataHandler : MonoBehaviour
                     {
                         dicomMetadata.SOPInstanceUID = dicomFile.Dataset.GetString(DicomTag.SOPInstanceUID);
                     }
+                    if (dicomFile.Dataset.Contains(DicomTag.ImageOrientationPatient))
+                    {
+                        dicomMetadata.ImageOrientationPatient = dicomFile.Dataset.GetValues<double>(DicomTag.ImageOrientationPatient);
+                    }
 
                     _selectedSlicesMetadata.Add(dicomMetadata);
                 }
@@ -275,6 +279,10 @@ public class DicomDataHandler : MonoBehaviour
         Debug.Log(_selectedSlicesMetadata[0].ImagePositionPatient);
         Debug.Log(_selectedSlicesMetadata[1].ImagePositionPatient);
         Debug.Log(_selectedSlicesMetadata[0].DicomSliceOrder);
+        foreach (var value in _selectedSlicesMetadata[0].ImageOrientationPatient)
+        {
+            Debug.Log(value);
+        }
     }
 
     private Vector3 ParseDicomPosition(string dicomPositionString)
