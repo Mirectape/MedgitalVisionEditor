@@ -5,5 +5,5 @@ public enum DicomSliceOrder
     IS = 1, SI = 2, //Axial
     LR = 3, RL = 4, //Sagittal
     PA = 5, AP = 6, //Coronal
-    RotatedOreder = 7,
+    RotatedOrder = 7,
 }

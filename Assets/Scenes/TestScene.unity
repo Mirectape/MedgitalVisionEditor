@@ -427,6 +427,7 @@ GameObject:
   - component: {fileID: 1233772215}
   - component: {fileID: 1233772217}
   - component: {fileID: 1233772216}
+  - component: {fileID: 1233772218}
   m_Layer: 0
   m_Name: DicomLoader
   m_TagString: Untagged
@@ -471,6 +472,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15ef25adb8344ce46af95774abba5a57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1233772218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1233772213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fffc3c2e1f6475e46b2ace96ada89ea1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &1351945592

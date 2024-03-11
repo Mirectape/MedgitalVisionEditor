@@ -12,8 +12,9 @@ public class DicomVolumeBuilder : MonoBehaviour
 {
     public DicomVolumeBuilder Instance { get; private set; }
     public static VolumeRenderedObject VolumeRenderedObject { get; private set; }
-
     private Texture3D _mainTexture;
+    
+    public static Action<UnityEngine.Transform> onVolumeBuilt;
 
     private void Awake()
     {
@@ -45,12 +46,13 @@ public class DicomVolumeBuilder : MonoBehaviour
     public void Create3DTextureFromImage()
     {
         DateTime t1 = DateTime.Now;
-        // Преобразуем тип данных изображения в float
+
+        // Image to floatImage transition
         CastImageFilter castFilter = new CastImageFilter();
         castFilter.SetOutputPixelType(PixelIDValueEnum.sitkFloat32);
         Image floatImage = castFilter.Execute(DicomDataHandler.MainImage);
 
-        // Получаем размеры изображения
+        // Size of image in volume
         VectorUInt32 dims = floatImage.GetSize();
         int width = (int)dims[0];
         int height = (int)dims[1];
@@ -58,7 +60,7 @@ public class DicomVolumeBuilder : MonoBehaviour
         int size = width * height * depth;
 
         float[] buffer = new float[size];
-        Marshal.Copy(floatImage.GetBufferAsFloat(), buffer, 0, size);
+        Marshal.Copy(floatImage.GetBufferAsFloat(), buffer, 0, size); //???
 
         NativeArray<ushort> pixelBytes = new NativeArray<ushort>(size, Allocator.Persistent); //DOTS!!!
 
@@ -150,7 +152,8 @@ public class DicomVolumeBuilder : MonoBehaviour
         UnityEngine.Transform outerObjectTransform = outerObject.transform;
 
         ApplyTexturing(volObj, meshRenderer);
-
         VolumeRenderedObject = volObj;
+
+        onVolumeBuilt?.Invoke(outerObjectTransform);
     }
 }
