@@ -11,6 +11,7 @@ public class DicomVolumeTransformer : MonoBehaviour
     // 0 0 1 = IS
     // 0 0 -1 = SI
 
+    private Vector3 _focalPoint = new Vector3(0, 0, 0);
     private Vector3 _rotationAxis;
     private float _rotationAngle;
 
@@ -37,234 +38,72 @@ public class DicomVolumeTransformer : MonoBehaviour
             Vector4 row3 = DicomDataHandler.SlicesOrientationMatrix.GetRow(2);
             if(row1 != LR || row1 != RL)
             {
-                if(row1 == SI)
+                if(row1 == SI || row1 == IS)
                 {
+                    if(row1 == IS)
+                    {
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
+                    }
+
                     if(row2 == RL)
                     {
-                        //
-                        if (row3 == AP)
-                        {
-
-                        }
-                        if (row3 == PA)
-                        {
-
-                        }
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
                     }
-                    if(row2 == LR)
+
+                    if(row2 == LR) 
                     {
-                        //
-                        if (row3 == AP)
-                        {
-
-                        }
-                        if (row3 == PA)
-                        {
-
-                        }
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.right, -90f);
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
                     }
-                    if(row3 == RL)
+
+                    if (row3 == RL || row3 == LR) 
                     {
-                        _rotationAxis = Vector3.up;
-                        _rotationAngle = 90f;
-                        Matrix4x4 rotationMatrix = Matrix4x4.Rotate(Quaternion.AngleAxis(_rotationAngle, _rotationAxis));
-                        outerObject.transform.rotation = rotationMatrix.rotation * transform.rotation;
-                        if(row2 == AP)
-                        {
-
-                        }
-                        if(row2 == PA)
-                        {
-
-                        }
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
                     }
-                    if(row3 == LR)
+
+                    if (row3 == LR)
                     {
-                        //
-                        if (row2 == AP)
-                        {
-
-                        }
-                        if (row2 == PA)
-                        {
-
-                        }
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
                     }
                 }
 
-                if(row1 == IS)
+                if (row1 == AP || row1 == PA)
                 {
+                    if(row1 == AP)
+                    {
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
+                    }
+
                     if (row2 == RL)
                     {
-                        //
-                        if (row3 == AP)
-                        {
-
-                        }
-                        if (row3 == PA)
-                        {
-
-                        }
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 90f);
                     }
                     if (row2 == LR)
                     {
-                        //
-                        if (row3 == AP)
-                        {
-
-                        }
-                        if (row3 == PA)
-                        {
-
-                        }
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 90f);
                     }
-                    if (row3 == RL)
+                    if (row3 == RL || row1 == LR)
                     {
-                        _rotationAxis = Vector3.up;
-                        _rotationAngle = 90f;
-                        Matrix4x4 rotationMatrix = Matrix4x4.Rotate(Quaternion.AngleAxis(_rotationAngle, _rotationAxis));
-                        outerObject.transform.rotation = rotationMatrix.rotation * transform.rotation;
-                        if (row2 == AP)
+                        if (row3 == LR)
                         {
-
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
                         }
-                        if (row2 == PA)
-                        {
-
-                        }
-                    }
-                    if (row3 == LR)
-                    {
-                        //
-                        if (row2 == AP)
-                        {
-
-                        }
-                        if (row2 == PA)
-                        {
-
-                        }
-                    }
-                }
-
-                if (row1 == AP)
-                {
-                    if (row2 == RL)
-                    {
-                        //
-                        if (row3 == SI)
-                        {
-
-                        }
-                        if (row3 == IS)
-                        {
-
-                        }
-                    }
-                    if (row2 == LR)
-                    {
-                        //
-                        if (row3 == SI)
-                        {
-
-                        }
-                        if (row3 == IS)
-                        {
-
-                        }
-                    }
-                    if (row3 == RL)
-                    {
-                        _rotationAxis = Vector3.up;
-                        _rotationAngle = 90f;
-                        Matrix4x4 rotationMatrix = Matrix4x4.Rotate(Quaternion.AngleAxis(_rotationAngle, _rotationAxis));
-                        outerObject.transform.rotation = rotationMatrix.rotation * transform.rotation;
-                        if (row2 == SI)
-                        {
-
-                        }
-                        if (row2 == IS)
-                        {
-
-                        }
-                    }
-                    if (row3 == LR)
-                    {
-                        //
-                        if (row2 == SI)
-                        {
-
-                        }
-                        if (row2 == IS)
-                        {
-
-                        }
-                    }
-                }
-
-                if(row1 == PA)
-                {
-                    if (row2 == RL)
-                    {
-                        //
-                        if (row3 == SI)
-                        {
-
-                        }
-                        if (row3 == IS)
-                        {
-
-                        }
-                    }
-                    if (row2 == LR)
-                    {
-                        //
-                        if (row3 == SI)
-                        {
-
-                        }
-                        if (row3 == IS)
-                        {
-
-                        }
-                    }
-                    if (row3 == RL)
-                    {
-                        _rotationAxis = Vector3.up;
-                        _rotationAngle = 90f;
-                        Matrix4x4 rotationMatrix = Matrix4x4.Rotate(Quaternion.AngleAxis(_rotationAngle, _rotationAxis));
-                        outerObject.transform.rotation = rotationMatrix.rotation * transform.rotation;
-                        if (row2 == SI)
-                        {
-
-                        }
-                        if (row2 == IS)
-                        {
-
-                        }
-                    }
-                    if (row3 == LR)
-                    {
-                        //
-                        if (row2 == SI)
-                        {
-
-                        }
-                        if (row2 == IS)
-                        {
-
-                        }
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 90f);
                     }
                 }
             }
             else if (row1 == LR || row1 == RL)
             {
-                if(row1 == RL)
+                if(row1 == LR)
                 {
-
+                    outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
                 }
 
-                if(row2 == AP)
+                if(row2 == AP || row2 == PA)
                 {
                     if(row3 == SI)
                     {
@@ -320,5 +159,8 @@ public class DicomVolumeTransformer : MonoBehaviour
         {
             Debug.LogError("The order is broken!");
         }
+
+        outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f); // LPS -> RAS
+        //outerObject.transform.RotateAround(_focalPoint, Vector3.right, -90f); // y <--> z 
     }
 }
