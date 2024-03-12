@@ -41,11 +41,27 @@ public class DicomVolumeTransformer : MonoBehaviour
                 {
                     if(row2 == RL)
                     {
+                        //
+                        if (row3 == AP)
+                        {
 
+                        }
+                        if (row3 == PA)
+                        {
+
+                        }
                     }
                     if(row2 == LR)
                     {
+                        //
+                        if (row3 == AP)
+                        {
 
+                        }
+                        if (row3 == PA)
+                        {
+
+                        }
                     }
                     if(row3 == RL)
                     {
@@ -53,22 +69,256 @@ public class DicomVolumeTransformer : MonoBehaviour
                         _rotationAngle = 90f;
                         Matrix4x4 rotationMatrix = Matrix4x4.Rotate(Quaternion.AngleAxis(_rotationAngle, _rotationAxis));
                         outerObject.transform.rotation = rotationMatrix.rotation * transform.rotation;
+                        if(row2 == AP)
+                        {
+
+                        }
+                        if(row2 == PA)
+                        {
+
+                        }
                     }
                     if(row3 == LR)
+                    {
+                        //
+                        if (row2 == AP)
+                        {
+
+                        }
+                        if (row2 == PA)
+                        {
+
+                        }
+                    }
+                }
+
+                if(row1 == IS)
+                {
+                    if (row2 == RL)
+                    {
+                        //
+                        if (row3 == AP)
+                        {
+
+                        }
+                        if (row3 == PA)
+                        {
+
+                        }
+                    }
+                    if (row2 == LR)
+                    {
+                        //
+                        if (row3 == AP)
+                        {
+
+                        }
+                        if (row3 == PA)
+                        {
+
+                        }
+                    }
+                    if (row3 == RL)
+                    {
+                        _rotationAxis = Vector3.up;
+                        _rotationAngle = 90f;
+                        Matrix4x4 rotationMatrix = Matrix4x4.Rotate(Quaternion.AngleAxis(_rotationAngle, _rotationAxis));
+                        outerObject.transform.rotation = rotationMatrix.rotation * transform.rotation;
+                        if (row2 == AP)
+                        {
+
+                        }
+                        if (row2 == PA)
+                        {
+
+                        }
+                    }
+                    if (row3 == LR)
+                    {
+                        //
+                        if (row2 == AP)
+                        {
+
+                        }
+                        if (row2 == PA)
+                        {
+
+                        }
+                    }
+                }
+
+                if (row1 == AP)
+                {
+                    if (row2 == RL)
+                    {
+                        //
+                        if (row3 == SI)
+                        {
+
+                        }
+                        if (row3 == IS)
+                        {
+
+                        }
+                    }
+                    if (row2 == LR)
+                    {
+                        //
+                        if (row3 == SI)
+                        {
+
+                        }
+                        if (row3 == IS)
+                        {
+
+                        }
+                    }
+                    if (row3 == RL)
+                    {
+                        _rotationAxis = Vector3.up;
+                        _rotationAngle = 90f;
+                        Matrix4x4 rotationMatrix = Matrix4x4.Rotate(Quaternion.AngleAxis(_rotationAngle, _rotationAxis));
+                        outerObject.transform.rotation = rotationMatrix.rotation * transform.rotation;
+                        if (row2 == SI)
+                        {
+
+                        }
+                        if (row2 == IS)
+                        {
+
+                        }
+                    }
+                    if (row3 == LR)
+                    {
+                        //
+                        if (row2 == SI)
+                        {
+
+                        }
+                        if (row2 == IS)
+                        {
+
+                        }
+                    }
+                }
+
+                if(row1 == PA)
+                {
+                    if (row2 == RL)
+                    {
+                        //
+                        if (row3 == SI)
+                        {
+
+                        }
+                        if (row3 == IS)
+                        {
+
+                        }
+                    }
+                    if (row2 == LR)
+                    {
+                        //
+                        if (row3 == SI)
+                        {
+
+                        }
+                        if (row3 == IS)
+                        {
+
+                        }
+                    }
+                    if (row3 == RL)
+                    {
+                        _rotationAxis = Vector3.up;
+                        _rotationAngle = 90f;
+                        Matrix4x4 rotationMatrix = Matrix4x4.Rotate(Quaternion.AngleAxis(_rotationAngle, _rotationAxis));
+                        outerObject.transform.rotation = rotationMatrix.rotation * transform.rotation;
+                        if (row2 == SI)
+                        {
+
+                        }
+                        if (row2 == IS)
+                        {
+
+                        }
+                    }
+                    if (row3 == LR)
+                    {
+                        //
+                        if (row2 == SI)
+                        {
+
+                        }
+                        if (row2 == IS)
+                        {
+
+                        }
+                    }
+                }
+            }
+            else if (row1 == LR || row1 == RL)
+            {
+                if(row1 == RL)
+                {
+
+                }
+
+                if(row2 == AP)
+                {
+                    if(row3 == SI)
+                    {
+
+                    }
+                    if (row3 == IS)
                     {
 
                     }
                 }
-                if(row1 == IS)
+                if(row2 == PA)
                 {
+                    if (row3 == SI)
+                    {
 
+                    }
+                    if (row3 == IS)
+                    {
+
+                    }
                 }
-            }
-            else
-            {
+                if(row2 == SI)
+                {
+                    if (row3 == PA)
+                    {
 
+                    }
+                    if (row3 == AP)
+                    {
+
+                    }
+                }
+                if(row2 == IS)
+                {
+                    if (row3 == PA)
+                    {
+
+                    }
+                    if (row3 == AP)
+                    {
+
+                    }
+                }
             }
         }
 
+        if (DicomDataHandler.SelectedSlicesMetadata[0].DicomSliceOrder == DicomSliceOrder.RotatedOrder)
+        {
+            Debug.LogError("Rotated scans are not supported in this programm yet. If you want to continue, please, format your scans into " +
+                "the non-rotated orthoganal order and upload anew!");
+        }
+        if (DicomDataHandler.SelectedSlicesMetadata[0].DicomSliceOrder == DicomSliceOrder.UnknownOrder)
+        {
+            Debug.LogError("The order is broken!");
+        }
     }
 }
