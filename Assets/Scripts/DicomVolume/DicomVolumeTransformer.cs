@@ -57,15 +57,31 @@ public class DicomVolumeTransformer : MonoBehaviour
                         outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
                     }
 
-                    if (row3 == RL || row3 == LR) 
+                    if(row1 == SI)
                     {
-                        outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
-                    }
+                        if (row3 == RL) 
+                        {
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
+                        }
 
-                    if (row3 == LR)
+                        if (row3 == LR)
+                        {
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
+                        }
+                    }
+                    if(row1 == IS)
                     {
-                        outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
-                        outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
+                        if (row3 == LR)
+                        {
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
+                        }
+
+                        if (row3 == RL)
+                        {
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
+                        }
                     }
                 }
 
@@ -85,14 +101,34 @@ public class DicomVolumeTransformer : MonoBehaviour
                     {
                         outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 90f);
                     }
-                    if (row3 == RL || row1 == LR)
+
+                    if(row1 == PA)
                     {
+                        if (row3 == RL)
+                        {
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 90f);
+                        }
                         if (row3 == LR)
                         {
                             outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 90f);
                         }
-                        outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
-                        outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 90f);
+                    }
+                    if (row1 == AP)
+                    {
+                        if (row3 == LR)
+                        {
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 90f);
+                        }
+                        if (row3 == RL)
+                        {
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
+                            outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 90f);
+                        }
                     }
                 }
             }
@@ -103,48 +139,19 @@ public class DicomVolumeTransformer : MonoBehaviour
                     outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
                 }
 
-                if(row2 == AP || row2 == PA)
+                if(row3 == AP || row3 == PA)
                 {
-                    if(row3 == SI)
+                    if(row3 == PA)
                     {
-
-                    }
-                    if (row3 == IS)
-                    {
-
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
                     }
                 }
-                if(row2 == PA)
+
+                if(row3 == SI || row3 == IS)
                 {
-                    if (row3 == SI)
+                    if(row2 == SI)
                     {
-
-                    }
-                    if (row3 == IS)
-                    {
-
-                    }
-                }
-                if(row2 == SI)
-                {
-                    if (row3 == PA)
-                    {
-
-                    }
-                    if (row3 == AP)
-                    {
-
-                    }
-                }
-                if(row2 == IS)
-                {
-                    if (row3 == PA)
-                    {
-
-                    }
-                    if (row3 == AP)
-                    {
-
+                        outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
                     }
                 }
             }
@@ -160,7 +167,7 @@ public class DicomVolumeTransformer : MonoBehaviour
             Debug.LogError("The order is broken!");
         }
 
+        outerObject.transform.RotateAround(_focalPoint, Vector3.right, -90f); // y <--> z 
         outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f); // LPS -> RAS
-        //outerObject.transform.RotateAround(_focalPoint, Vector3.right, -90f); // y <--> z 
     }
 }
