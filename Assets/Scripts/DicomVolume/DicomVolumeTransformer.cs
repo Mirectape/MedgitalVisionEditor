@@ -132,27 +132,45 @@ public class DicomVolumeTransformer : MonoBehaviour
                     }
                 }
             }
-            else if (row1 == LR || row1 == RL)
+            if (row1 == LR || row1 == RL)
             {
-                if(row1 == LR)
+                if (row1 == RL && row2 == AP)
+                {
+                    outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
+                }
+
+                if (row1 == LR && row2 == PA)
                 {
                     outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
+
                 }
 
-                if(row3 == AP || row3 == PA)
+                if (row1 == LR && row2 == AP)
                 {
-                    if(row3 == PA)
-                    {
-                        outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
-                    }
+                    outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 180f);
                 }
 
-                if(row3 == SI || row3 == IS)
+                if(row1 == RL && row2 == IS)
                 {
-                    if(row2 == SI)
-                    {
-                        outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
-                    }
+                    outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
+                }
+
+                if (row1 == RL && row2 == SI)
+                {
+                    outerObject.transform.RotateAround(_focalPoint, Vector3.right, -90f);
+                }
+
+                if (row1 == LR && row2 == IS)
+                {
+                    outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
+                    outerObject.transform.RotateAround(_focalPoint, Vector3.right, -90f);
+                }
+
+                if (row1 == LR && row2 == SI)
+                {
+                    outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
+                    outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
+                    outerObject.transform.RotateAround(_focalPoint, Vector3.right, -90f);
                 }
             }
         }
