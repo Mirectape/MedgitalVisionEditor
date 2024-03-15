@@ -187,5 +187,19 @@ public class DicomVolumeTransformer : MonoBehaviour
 
         outerObject.transform.RotateAround(_focalPoint, Vector3.right, -90f); // y <--> z 
         outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f); // LPS -> RAS
+
+        //Check if inverted
+        if (DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.x < -1 ||
+            DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.y < -1 ||
+            DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.z < -1)
+        {
+            if (DicomDataHandler.SelectedSlicesMetadata[10].ImagePositionPatient.x < -1 ||
+                DicomDataHandler.SelectedSlicesMetadata[10].ImagePositionPatient.y < -1 ||
+                DicomDataHandler.SelectedSlicesMetadata[10].ImagePositionPatient.z < -1)
+            {
+                outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
+                Debug.LogWarning("Image was inverted!");
+            }
+        }
     }
 }
