@@ -7,6 +7,7 @@ using FellowOakDicom;
 using UnityEngine;
 using itk.simple;
 using System.Text;
+using System.Linq;
 using FellowOakDicom.Imaging.Reconstruction;
 
 public class DicomDataHandler : MonoBehaviour
@@ -201,8 +202,16 @@ public class DicomDataHandler : MonoBehaviour
 
     private void DefineMainImageOrientation()
     {
+        //var firstSlice = _selectedSlicesMetadata.Where(n => n.InstanceNumber == 1).Single().ImagePositionPatient;
+        //var secondSlice = _selectedSlicesMetadata.Where(n => n.InstanceNumber == 2).Single().ImagePositionPatient;
+
         var firstSlice = _selectedSlicesMetadata[0].ImagePositionPatient;
         var secondSlice = _selectedSlicesMetadata[1].ImagePositionPatient;
+        //Debug.Log("slice 1: " + _selectedSlicesMetadata[0].ImagePositionPatient + "vs" + _selectedSlicesMetadata.Where(n => n.InstanceNumber == 1).Single().ImagePositionPatient);
+        //Debug.Log("slice 2: " + _selectedSlicesMetadata[1].ImagePositionPatient + "vs" + _selectedSlicesMetadata.Where(n => n.InstanceNumber == 2).Single().ImagePositionPatient);
+
+        //Debug.Log(String.Join(" ",MainImage.TransformIndexToPhysicalPoint(new VectorInt64() { 0, 0, 0 })));
+        //Debug.Log(String.Join(" ", MainImage.TransformIndexToPhysicalPoint(new VectorInt64() { 199, 199, 199 })));
 
         var sliceDirectionVector = secondSlice - firstSlice; //(R,A,S)
         DicomType dicomType = GetDicomType(sliceDirectionVector);

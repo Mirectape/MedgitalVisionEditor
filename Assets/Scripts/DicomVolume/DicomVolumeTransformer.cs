@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DicomVolumeTransformer : MonoBehaviour
@@ -11,6 +12,7 @@ public class DicomVolumeTransformer : MonoBehaviour
     // 0 0 1 = IS
     // 0 0 -1 = SI
 
+    private UnityEngine.Transform _outerObject;
     private Vector3 _focalPoint = new Vector3(0, 0, 0);
     private Vector3 _rotationAxis;
     private float _rotationAngle;
@@ -25,7 +27,44 @@ public class DicomVolumeTransformer : MonoBehaviour
 
     private void Awake()
     {
+        DicomVolumeBuilder.onVolumeBuilt += ApplyInversion;
         DicomVolumeBuilder.onVolumeBuilt += ApplyRotation;
+    }
+
+    public void InvertOuterObject()
+    {
+        if (_outerObject != null)
+        {
+            ApplyInversion(_outerObject);
+        }
+        else
+        {
+            Debug.LogError("The object to invert hasn't been loaded yet!");
+        }
+    }
+
+    private void ApplyInversion(UnityEngine.Transform outerObject)
+    {
+        _outerObject = outerObject;
+        Vector4 row1 = DicomDataHandler.SlicesOrientationMatrix.GetRow(0);
+        Vector4 row2 = DicomDataHandler.SlicesOrientationMatrix.GetRow(1);
+        Vector4 row3 = DicomDataHandler.SlicesOrientationMatrix.GetRow(2);
+
+        if (row1 == LR || row1 == RL)
+        {
+            outerObject.localScale = new Vector3(-1 * outerObject.transform.localScale.x, 
+                outerObject.transform.localScale.y, outerObject.transform.localScale.z);
+        }
+        if (row2 == LR || row2 == RL)
+        {
+            outerObject.localScale = new Vector3(outerObject.transform.localScale.x, 
+                -1 * outerObject.transform.localScale.y, outerObject.transform.localScale.z);
+        }
+        if (row3 == LR || row3 == RL)
+        {
+            outerObject.localScale = new Vector3(outerObject.transform.localScale.x,
+                outerObject.transform.localScale.y, -1 * outerObject.transform.localScale.z);
+        }
     }
 
     private void ApplyRotation(UnityEngine.Transform outerObject)
@@ -140,9 +179,9 @@ public class DicomVolumeTransformer : MonoBehaviour
                 }
 
                 if (row1 == LR && row2 == PA)
-                {
+                { 
                     outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
-
+                    Debug.Log("Yes!");
                 }
 
                 if (row1 == LR && row2 == AP)
@@ -188,7 +227,7 @@ public class DicomVolumeTransformer : MonoBehaviour
         outerObject.transform.RotateAround(_focalPoint, Vector3.right, -90f); // y <--> z 
         outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f); // LPS -> RAS
 
-        //Check if inverted
+        //Check if rotated
         if (DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.x < -1 ||
             DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.y < -1 ||
             DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.z < -1)
@@ -197,9 +236,9 @@ public class DicomVolumeTransformer : MonoBehaviour
                 DicomDataHandler.SelectedSlicesMetadata[10].ImagePositionPatient.y < -1 ||
                 DicomDataHandler.SelectedSlicesMetadata[10].ImagePositionPatient.z < -1)
             {
-                outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
-                Debug.LogWarning("Image was inverted!");
+                Debug.LogWarning("Image was rotated!");
             }
         }
+        Debug.Log(DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient);
     }
 }
