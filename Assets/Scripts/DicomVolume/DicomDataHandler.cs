@@ -14,6 +14,8 @@ public class DicomDataHandler : MonoBehaviour
 {
     public static DicomDataHandler Instance { get; private set; }
 
+    public List<DicomSeries> DicomSeriesList { get; private set; } = new List<DicomSeries>();
+
     public static itk.simple.Image MainImage => Instance._mainImage;
     public static List<SeriesInfo> SeriesInfos => Instance._seriesInfos;
     public static List<SelectedDicomSliceMetadata> SelectedSlicesMetadata => Instance._selectedSlicesMetadata;
@@ -54,6 +56,7 @@ public class DicomDataHandler : MonoBehaviour
         OnDataLoaded += (sender, args) =>
         {
             Debug.Log("Loading is finished!");
+            DicomSeriesList.Add(new DicomSeries(_mainImage, _seriesInfos, _selectedSlicesMetadata, _slicesOrientationMatrix));
         };
     }
 
