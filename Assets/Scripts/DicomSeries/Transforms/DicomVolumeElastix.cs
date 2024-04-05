@@ -4,15 +4,18 @@ using UnityEngine;
 
 public class DicomVolumeElastix : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    private List<DicomSeries> _dicomSeries;
+
+    private void Start()
     {
-        
+        _dicomSeries = DicomDataHandler.DicomSeriesList;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void PrintDicomSeriesData()
     {
-        
+        foreach (var series in _dicomSeries)
+        {
+            Debug.Log(series);
+        }
     }
 }

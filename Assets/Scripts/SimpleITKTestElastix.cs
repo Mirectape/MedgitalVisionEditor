@@ -8,8 +8,8 @@ public class SimpleITKTestElastix : MonoBehaviour
 {
     void Start()
     {
-        string movingImagePath = @"C:\Users\antsy\Desktop\ElastixTest\MRIFixed";
-        string fixedImagePath = @"C:\Users\antsy\Desktop\ElastixTest\CTMoved";
+        string movingImagePath = @"C:\Users\Admin\Desktop\ElastixTest\MRIFixed";
+        string fixedImagePath = @"C:\Users\Admin\Desktop\ElastixTest\CTMoved";
         //movingImagePath
         try
         {

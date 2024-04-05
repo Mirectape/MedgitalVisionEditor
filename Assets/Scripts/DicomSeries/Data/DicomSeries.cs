@@ -21,4 +21,9 @@ public class DicomSeries
         _selectedSlicesMetadata = selectedSlicesMetadata;
         _slicesOrientationMatrix = slicesOrientationMatrix;
     }
+
+    public override string ToString()
+    {
+        return (SeriesInfos[0].patientName + SeriesInfos[0].dateStudy);
+    }
 }

@@ -43,6 +43,19 @@ public class DicomVolumeTransformer : MonoBehaviour
         }
     }
 
+    private void ApplyScale(UnityEngine.Transform outerObject)
+    {
+        int rows = DicomDataHandler.SelectedSlicesMetadata[0].Rows;
+        int columns = DicomDataHandler.SelectedSlicesMetadata[0].Columns;
+        int numberOfSlices = DicomDataHandler.SelectedSlicesMetadata.Count;
+
+        double pixelSpacingRow = DicomDataHandler.SelectedSlicesMetadata[0].PixelSpacing[0];
+        double pixelSpacingColumn = DicomDataHandler.SelectedSlicesMetadata[0].PixelSpacing[1];
+        double spacingBetweenSlices = DicomDataHandler.SelectedSlicesMetadata[0].SliceThickness;
+
+        
+    }
+
     private void ApplyInversion(UnityEngine.Transform outerObject)
     {
         _outerObject = outerObject;

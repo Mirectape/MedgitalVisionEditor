@@ -9,12 +9,14 @@ using itk.simple;
 using System.Text;
 using System.Linq;
 using FellowOakDicom.Imaging.Reconstruction;
+using UnityEditor.SceneManagement;
+using openDicom.File;
 
 public class DicomDataHandler : MonoBehaviour
 {
     public static DicomDataHandler Instance { get; private set; }
 
-    public List<DicomSeries> DicomSeriesList { get; private set; } = new List<DicomSeries>();
+    public static List<DicomSeries> DicomSeriesList { get; private set; } = new List<DicomSeries>();
 
     public static itk.simple.Image MainImage => Instance._mainImage;
     public static List<SeriesInfo> SeriesInfos => Instance._seriesInfos;
@@ -108,7 +110,7 @@ public class DicomDataHandler : MonoBehaviour
             var dicomNames = ImageSeriesReader.GetGDCMSeriesFileNames(dir, seriesID);
             if (dicomNames.Count > 0)
             {
-                var dicomFile = DicomFile.Open(dicomNames[0]); //[0] because information on seriesID is the same for all files in a chosen dir
+                var dicomFile = FellowOakDicom.DicomFile.Open(dicomNames[0]); //[0] because information on seriesID is the same for all files in a chosen dir
 
                 var seriesInfo = new SeriesInfo // what series we have 
                 {
@@ -129,8 +131,8 @@ public class DicomDataHandler : MonoBehaviour
 
                     for (int i = 1; i < dicomNames.Count; i++)
                     {
-                        int instanceNumber1 = DicomFile.Open(dicomNames[i - 1]).Dataset.GetSingleValue<int>(DicomTag.InstanceNumber);
-                        int instanceNumber2 = DicomFile.Open(dicomNames[i]).Dataset.GetSingleValue<int>(DicomTag.InstanceNumber);
+                        int instanceNumber1 = FellowOakDicom.DicomFile.Open(dicomNames[i - 1]).Dataset.GetSingleValue<int>(DicomTag.InstanceNumber);
+                        int instanceNumber2 = FellowOakDicom.DicomFile.Open(dicomNames[i]).Dataset.GetSingleValue<int>(DicomTag.InstanceNumber);
 
                         totalGaps += instanceNumber2 - instanceNumber1 - 1;
                     }
@@ -163,7 +165,7 @@ public class DicomDataHandler : MonoBehaviour
 
                 foreach (var dicomName in dicomNames)
                 {
-                    var dicomFile = DicomFile.Open(dicomName);
+                    var dicomFile = FellowOakDicom.DicomFile.Open(dicomName);
 
                     // Extract DICOM tags to our metadata class
                     var dicomMetadata = new SelectedDicomSliceMetadata();
@@ -189,8 +191,31 @@ public class DicomDataHandler : MonoBehaviour
                             (float)dicomMetadata.ImageOrientationPatient[4], (float)dicomMetadata.ImageOrientationPatient[5], 0));
                     }
 
+                    if(dicomFile.Dataset.Contains(DicomTag.Rows))
+                    {
+                        dicomMetadata.Rows = dicomFile.Dataset.GetSingleValue<int>(DicomTag.Rows);
+                    }
+                    if(dicomFile.Dataset.Contains(DicomTag.Columns))
+                    {
+                        dicomMetadata.Columns = dicomFile.Dataset.GetSingleValue<int>(DicomTag.Columns);
+                    }
+
+                    if (dicomFile.Dataset.Contains(DicomTag.PixelSpacing))
+                    {
+                        dicomMetadata.PixelSpacing = dicomFile.Dataset.GetValues<double>(DicomTag.PixelSpacing);
+                    }
+                    if (dicomFile.Dataset.Contains(DicomTag.SliceThickness))
+                    {
+                        dicomMetadata.SliceThickness = dicomFile.Dataset.GetSingleValue<double>(DicomTag.SliceThickness);
+                    }
                     _selectedSlicesMetadata.Add(dicomMetadata);
                 }
+
+                Debug.Log("Rows: " + _selectedSlicesMetadata[0].Rows);
+                Debug.Log("Columns: " + _selectedSlicesMetadata[0].Columns);
+                Debug.Log("Number of slices: " + _selectedSlicesMetadata.Count);
+                Debug.Log("Pixel spacing: " + _selectedSlicesMetadata[0].PixelSpacing[0] + "    " + _selectedSlicesMetadata[0].PixelSpacing[1]);
+                Debug.Log("Slice thickness: " + _selectedSlicesMetadata[0].SliceThickness);
 
                 DefineMainImageOrientation();
                 PrintSlicesOrientationMatrix();
