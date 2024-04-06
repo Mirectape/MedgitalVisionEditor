@@ -7,8 +7,8 @@ public class DicomVolumeTransformer : MonoBehaviour
 {
     // 1 0 0 = LR
     // -1 0 0 = RL
-    // 0 1 0 = AP
-    // 0 -1 0 = PA
+    // 0 -1 0 = AP
+    // 0 1 0 = PA
     // 0 0 1 = IS
     // 0 0 -1 = SI
 
@@ -29,6 +29,7 @@ public class DicomVolumeTransformer : MonoBehaviour
     {
         DicomVolumeBuilder.onVolumeBuilt += ApplyInversion;
         DicomVolumeBuilder.onVolumeBuilt += ApplyRotation;
+        DicomVolumeBuilder.onVolumeBuilt += ApplyScale;
     }
 
     public void InvertOuterObject()
@@ -45,15 +46,20 @@ public class DicomVolumeTransformer : MonoBehaviour
 
     private void ApplyScale(UnityEngine.Transform outerObject)
     {
-        int rows = DicomDataHandler.SelectedSlicesMetadata[0].Rows;
-        int columns = DicomDataHandler.SelectedSlicesMetadata[0].Columns;
-        int numberOfSlices = DicomDataHandler.SelectedSlicesMetadata.Count;
+        var imageDimensions = DicomDataHandler.MainImage.GetSize();
+        var imageSpacing = DicomDataHandler.MainImage.GetSpacing();
 
-        double pixelSpacingRow = DicomDataHandler.SelectedSlicesMetadata[0].PixelSpacing[0];
-        double pixelSpacingColumn = DicomDataHandler.SelectedSlicesMetadata[0].PixelSpacing[1];
-        double spacingBetweenSlices = DicomDataHandler.SelectedSlicesMetadata[0].SliceThickness;
+        uint rows = imageDimensions[0];
+        uint columns = imageDimensions[1];
+        uint numberOfSlices = imageDimensions[2];
 
-        
+        double pixelSpacingRow = imageSpacing[0];
+        double pixelSpacingColumn = imageSpacing[1];
+        double spacingBetweenSlices = imageSpacing[2];
+
+        outerObject.transform.localScale = new Vector3((float)(outerObject.transform.localScale.x * rows * pixelSpacingRow/1000),
+                                                        (float)(outerObject.transform.localScale.y * columns * pixelSpacingColumn / 1000),
+                                                        (float)(outerObject.transform.localScale.z * numberOfSlices * spacingBetweenSlices / 1000));
     }
 
     private void ApplyInversion(UnityEngine.Transform outerObject)
@@ -194,7 +200,6 @@ public class DicomVolumeTransformer : MonoBehaviour
                 if (row1 == LR && row2 == PA)
                 { 
                     outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
-                    Debug.Log("Yes!");
                 }
 
                 if (row1 == LR && row2 == AP)
@@ -215,7 +220,7 @@ public class DicomVolumeTransformer : MonoBehaviour
                 if (row1 == LR && row2 == IS)
                 {
                     outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
-                    outerObject.transform.RotateAround(_focalPoint, Vector3.right, -90f);
+                    outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
                 }
 
                 if (row1 == LR && row2 == SI)

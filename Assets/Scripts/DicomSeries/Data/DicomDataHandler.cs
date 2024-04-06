@@ -161,6 +161,9 @@ public class DicomDataHandler : MonoBehaviour
                 reader.SetFileNames(dicomNames);
                 _mainImage = reader.Execute();
 
+                Debug.Log("DATAAAAAAAAAAAA: "+String.Join(" ,", _mainImage.GetSize()));
+                Debug.Log("DATAAAAAAAAAAAA: "+String.Join(" ,",_mainImage.GetSpacing()));
+
                 _selectedSlicesMetadata = new List<SelectedDicomSliceMetadata>();
 
                 foreach (var dicomName in dicomNames)
@@ -190,32 +193,8 @@ public class DicomDataHandler : MonoBehaviour
                         _slicesOrientationMatrix.SetRow(1, new Vector4((float)dicomMetadata.ImageOrientationPatient[3],
                             (float)dicomMetadata.ImageOrientationPatient[4], (float)dicomMetadata.ImageOrientationPatient[5], 0));
                     }
-
-                    if(dicomFile.Dataset.Contains(DicomTag.Rows))
-                    {
-                        dicomMetadata.Rows = dicomFile.Dataset.GetSingleValue<int>(DicomTag.Rows);
-                    }
-                    if(dicomFile.Dataset.Contains(DicomTag.Columns))
-                    {
-                        dicomMetadata.Columns = dicomFile.Dataset.GetSingleValue<int>(DicomTag.Columns);
-                    }
-
-                    if (dicomFile.Dataset.Contains(DicomTag.PixelSpacing))
-                    {
-                        dicomMetadata.PixelSpacing = dicomFile.Dataset.GetValues<double>(DicomTag.PixelSpacing);
-                    }
-                    if (dicomFile.Dataset.Contains(DicomTag.SliceThickness))
-                    {
-                        dicomMetadata.SliceThickness = dicomFile.Dataset.GetSingleValue<double>(DicomTag.SliceThickness);
-                    }
                     _selectedSlicesMetadata.Add(dicomMetadata);
                 }
-
-                Debug.Log("Rows: " + _selectedSlicesMetadata[0].Rows);
-                Debug.Log("Columns: " + _selectedSlicesMetadata[0].Columns);
-                Debug.Log("Number of slices: " + _selectedSlicesMetadata.Count);
-                Debug.Log("Pixel spacing: " + _selectedSlicesMetadata[0].PixelSpacing[0] + "    " + _selectedSlicesMetadata[0].PixelSpacing[1]);
-                Debug.Log("Slice thickness: " + _selectedSlicesMetadata[0].SliceThickness);
 
                 DefineMainImageOrientation();
                 PrintSlicesOrientationMatrix();
@@ -235,13 +214,14 @@ public class DicomDataHandler : MonoBehaviour
 
         var firstSlice = _selectedSlicesMetadata[0].ImagePositionPatient;
         var secondSlice = _selectedSlicesMetadata[1].ImagePositionPatient;
-        //Debug.Log("slice 1: " + _selectedSlicesMetadata[0].ImagePositionPatient + "vs" + _selectedSlicesMetadata.Where(n => n.InstanceNumber == 1).Single().ImagePositionPatient);
-        //Debug.Log("slice 2: " + _selectedSlicesMetadata[1].ImagePositionPatient + "vs" + _selectedSlicesMetadata.Where(n => n.InstanceNumber == 2).Single().ImagePositionPatient);
+        Debug.Log("slice 1: " + _selectedSlicesMetadata[0].ImagePositionPatient + "vs" + _selectedSlicesMetadata.Where(n => n.InstanceNumber == 1).Single().ImagePositionPatient);
+        Debug.Log("slice 2: " + _selectedSlicesMetadata[1].ImagePositionPatient + "vs" + _selectedSlicesMetadata.Where(n => n.InstanceNumber == 2).Single().ImagePositionPatient);
 
         //Debug.Log(String.Join(" ",MainImage.TransformIndexToPhysicalPoint(new VectorInt64() { 0, 0, 0 })));
         //Debug.Log(String.Join(" ", MainImage.TransformIndexToPhysicalPoint(new VectorInt64() { 199, 199, 199 })));
 
         var sliceDirectionVector = secondSlice - firstSlice; //(R,A,S)
+        Debug.Log(sliceDirectionVector);
         DicomType dicomType = GetDicomType(sliceDirectionVector);
 
         if (dicomType == DicomType.NonRotated)
@@ -275,7 +255,7 @@ public class DicomDataHandler : MonoBehaviour
                     }
                     _slicesOrientationMatrix.SetRow(2, new Vector4(0, -1, 0, 0));
                 }
-                else if (sliceDirectionVector.y < 0)
+                if (sliceDirectionVector.y < 0)
                 {
                     foreach (var slice in _selectedSlicesMetadata)
                     {
