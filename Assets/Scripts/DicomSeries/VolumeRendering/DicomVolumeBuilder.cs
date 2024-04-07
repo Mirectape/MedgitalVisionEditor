@@ -12,8 +12,9 @@ public class DicomVolumeBuilder : MonoBehaviour
 {
     public DicomVolumeBuilder Instance { get; private set; }
     public static VolumeRenderedObject VolumeRenderedObject { get; private set; }
+    public UnityEngine.Transform InitialBuildingPoint { get; private set; }
     private Texture3D _mainTexture;
-    
+
     public static Action<UnityEngine.Transform> onVolumeBuilt;
 
     private void Awake()
@@ -26,7 +27,8 @@ public class DicomVolumeBuilder : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
+        InitialBuildingPoint = new GameObject("Initial Building Point").transform;
+        InitialBuildingPoint.transform.localPosition = new Vector3(-0.5f, -0.5f, -0.5f);
         DicomDataHandler.OnDataLoaded += InitializeVolumeRendering;
     }
 
@@ -154,6 +156,10 @@ public class DicomVolumeBuilder : MonoBehaviour
         ApplyTexturing(volObj, meshRenderer);
         VolumeRenderedObject = volObj;
 
+        InitialBuildingPoint.SetParent(outerObjectTransform); //Apply all the matrices to him along with image Volume 
+
         onVolumeBuilt?.Invoke(outerObjectTransform);
+
+        InitialBuildingPoint.SetParent(null); //Remove him from there to get Image origin at (0,0,0)
     }
 }

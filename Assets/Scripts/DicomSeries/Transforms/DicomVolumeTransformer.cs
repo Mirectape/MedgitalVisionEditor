@@ -14,8 +14,7 @@ public class DicomVolumeTransformer : MonoBehaviour
 
     private UnityEngine.Transform _outerObject;
     private Vector3 _focalPoint = new Vector3(0, 0, 0);
-    private Vector3 _rotationAxis;
-    private float _rotationAngle;
+
 
     private Vector4 LR = new Vector4(1, 0, 0, 0);
     private Vector4 RL = new Vector4(-1, 0, 0, 0);
@@ -24,7 +23,7 @@ public class DicomVolumeTransformer : MonoBehaviour
     private Vector4 IS = new Vector4(0, 0, 1, 0);
     private Vector4 SI = new Vector4(0, 0, -1, 0);
 
-
+    // Inversion -> Rotation(reflection included) -> Scale -> Offset(if needed)
     private void Awake()
     {
         DicomVolumeBuilder.onVolumeBuilt += ApplyInversion;
@@ -101,6 +100,7 @@ public class DicomVolumeTransformer : MonoBehaviour
                     if(row1 == IS)
                     {
                         outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f);
+                        
                     }
 
                     if(row2 == RL)
