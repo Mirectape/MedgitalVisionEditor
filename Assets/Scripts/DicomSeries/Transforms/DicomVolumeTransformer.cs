@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -14,7 +15,7 @@ public class DicomVolumeTransformer : MonoBehaviour
 
     private UnityEngine.Transform _outerObject;
     private Vector3 _focalPoint = new Vector3(0, 0, 0);
-
+    private bool _isAtCenter = true;
 
     private Vector4 LR = new Vector4(1, 0, 0, 0);
     private Vector4 RL = new Vector4(-1, 0, 0, 0);
@@ -23,7 +24,7 @@ public class DicomVolumeTransformer : MonoBehaviour
     private Vector4 IS = new Vector4(0, 0, 1, 0);
     private Vector4 SI = new Vector4(0, 0, -1, 0);
 
-    // Inversion -> Rotation(reflection included) -> Scale -> Offset(if needed)
+    // Inversion -> Rotation(reflection included) -> Scale -> Translation(if needed)
     private void Awake()
     {
         DicomVolumeBuilder.onVolumeBuilt += ApplyInversion;
@@ -40,6 +41,34 @@ public class DicomVolumeTransformer : MonoBehaviour
         else
         {
             Debug.LogError("The object to invert hasn't been loaded yet!");
+        }
+    }
+
+    public void ApplyTranslation()
+    {
+        if(_outerObject != null)
+        {
+            Vector3 imageOriginSigns = new Vector3(-1, 1, -1);
+
+            var imageOrigin = new Vector3((float)DicomDataHandler.MainImage.GetOrigin()[0] * imageOriginSigns.x/1000,
+                                        (float)DicomDataHandler.MainImage.GetOrigin()[2] * imageOriginSigns.y/1000,
+                                        (float)DicomDataHandler.MainImage.GetOrigin()[1] * imageOriginSigns.z/ 1000);
+            Debug.Log(imageOrigin.x + " " + imageOrigin.y + " " + imageOrigin.z);
+
+            if (_isAtCenter)
+            {
+                _outerObject.transform.localPosition = new Vector3(_outerObject.localPosition.x - DicomVolumeBuilder.InitialBuildingPoint.x + imageOrigin.x,
+                                                                   _outerObject.localPosition.y - DicomVolumeBuilder.InitialBuildingPoint.y + imageOrigin.y,
+                                                                   _outerObject.localPosition.z - DicomVolumeBuilder.InitialBuildingPoint.z + imageOrigin.z);
+                _isAtCenter = false;
+            }
+            else
+            {
+                _outerObject.transform.localPosition = new Vector3(_outerObject.localPosition.x + DicomVolumeBuilder.InitialBuildingPoint.x - imageOrigin.x,
+                                                                   _outerObject.localPosition.y + DicomVolumeBuilder.InitialBuildingPoint.y - imageOrigin.y,
+                                                                   _outerObject.localPosition.z + DicomVolumeBuilder.InitialBuildingPoint.z - imageOrigin.z);
+                _isAtCenter = true;
+            }
         }
     }
 
