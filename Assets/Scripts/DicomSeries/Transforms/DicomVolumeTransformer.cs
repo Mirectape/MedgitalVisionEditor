@@ -8,8 +8,8 @@ public class DicomVolumeTransformer : MonoBehaviour
 {
     // 1 0 0 = LR
     // -1 0 0 = RL
-    // 0 -1 0 = AP
-    // 0 1 0 = PA
+    // 0 1 0 = AP
+    // 0 -1 0 = PA
     // 0 0 1 = IS
     // 0 0 -1 = SI
 
@@ -116,8 +116,8 @@ public class DicomVolumeTransformer : MonoBehaviour
 
     private void ApplyRotation(UnityEngine.Transform outerObject)
     {
-        if (DicomDataHandler.SelectedSlicesMetadata[0].DicomSliceOrder != DicomSliceOrder.RotatedOrder ||
-            DicomDataHandler.SelectedSlicesMetadata[0].DicomSliceOrder != DicomSliceOrder.UnknownOrder)
+        if (DicomDataHandler.DicomSliceOrder != DicomSliceOrder.RotatedOrder ||
+            DicomDataHandler.DicomSliceOrder != DicomSliceOrder.UnknownOrder)
         {
             Vector4 row1 = DicomDataHandler.SlicesOrientationMatrix.GetRow(0);
             Vector4 row2 = DicomDataHandler.SlicesOrientationMatrix.GetRow(1);
@@ -261,12 +261,12 @@ public class DicomVolumeTransformer : MonoBehaviour
             }
         }
 
-        if (DicomDataHandler.SelectedSlicesMetadata[0].DicomSliceOrder == DicomSliceOrder.RotatedOrder)
+        if (DicomDataHandler.DicomSliceOrder == DicomSliceOrder.RotatedOrder)
         {
             Debug.LogError("Rotated scans are not supported in this programm yet. If you want to continue, please, format your scans into " +
                 "the non-rotated orthoganal order and upload anew!");
         }
-        if (DicomDataHandler.SelectedSlicesMetadata[0].DicomSliceOrder == DicomSliceOrder.UnknownOrder)
+        if (DicomDataHandler.DicomSliceOrder == DicomSliceOrder.UnknownOrder)
         {
             Debug.LogError("The order is broken!");
         }
@@ -286,6 +286,5 @@ public class DicomVolumeTransformer : MonoBehaviour
                 Debug.LogWarning("Image was rotated!");
             }
         }
-        Debug.Log(DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient);
     }
 }

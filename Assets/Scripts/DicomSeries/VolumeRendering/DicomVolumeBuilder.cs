@@ -89,7 +89,7 @@ public class DicomVolumeBuilder : MonoBehaviour
         pixelBytes.Dispose();
 
         DateTime t2 = DateTime.Now;
-        Debug.Log((t2 - t1).TotalSeconds);
+        Debug.Log("Uploaded in: " + (t2 - t1).TotalSeconds + "seconds");
     }
 
     private void CreateObject()

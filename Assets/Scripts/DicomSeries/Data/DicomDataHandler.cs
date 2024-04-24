@@ -22,12 +22,14 @@ public class DicomDataHandler : MonoBehaviour
     public static List<SeriesInfo> SeriesInfos => Instance._seriesInfos;
     public static List<SelectedDicomSliceMetadata> SelectedSlicesMetadata => Instance._selectedSlicesMetadata;
     public static Matrix4x4 SlicesOrientationMatrix => Instance._slicesOrientationMatrix;
+    public static DicomSliceOrder DicomSliceOrder => Instance._dicomSliceOrder;
 
     #region private fields
     private itk.simple.Image _mainImage;
     private List<SeriesInfo> _seriesInfos = new List<SeriesInfo>();
     private List<SelectedDicomSliceMetadata> _selectedSlicesMetadata;
     private Matrix4x4 _slicesOrientationMatrix;
+    private DicomSliceOrder _dicomSliceOrder;
     #endregion
 
     public static EventHandler OnSeriesFound;
@@ -50,7 +52,7 @@ public class DicomDataHandler : MonoBehaviour
         {
             foreach (var i in _seriesInfos)
             {
-                Debug.Log(i.patientName + " " + i.seriesUID);
+                Debug.Log("The patient is: " + i.patientName + " " + i.seriesUID);
             }
 
             LoadDicomSeries(_seriesInfos[0].seriesUID); //the Dicom first series found
@@ -161,9 +163,6 @@ public class DicomDataHandler : MonoBehaviour
                 reader.SetFileNames(dicomNames);
                 _mainImage = reader.Execute();
 
-                Debug.Log("DATAAAAAAAAAAAA: "+String.Join(" ,", _mainImage.GetSize()));
-                Debug.Log("DATAAAAAAAAAAAA: "+String.Join(" ,",_mainImage.GetSpacing()));
-
                 _selectedSlicesMetadata = new List<SelectedDicomSliceMetadata>();
 
                 foreach (var dicomName in dicomNames)
@@ -188,10 +187,6 @@ public class DicomDataHandler : MonoBehaviour
                     if (dicomFile.Dataset.Contains(DicomTag.ImageOrientationPatient))
                     {
                         dicomMetadata.ImageOrientationPatient = dicomFile.Dataset.GetValues<double>(DicomTag.ImageOrientationPatient);
-                        _slicesOrientationMatrix.SetRow(0, new Vector4((float)dicomMetadata.ImageOrientationPatient[0],
-                            (float)dicomMetadata.ImageOrientationPatient[1], (float)dicomMetadata.ImageOrientationPatient[2], 0));
-                        _slicesOrientationMatrix.SetRow(1, new Vector4((float)dicomMetadata.ImageOrientationPatient[3],
-                            (float)dicomMetadata.ImageOrientationPatient[4], (float)dicomMetadata.ImageOrientationPatient[5], 0));
                     }
                     _selectedSlicesMetadata.Add(dicomMetadata);
                 }
@@ -209,96 +204,18 @@ public class DicomDataHandler : MonoBehaviour
 
     private void DefineMainImageOrientation()
     {
-        //var firstSlice = _selectedSlicesMetadata.Where(n => n.InstanceNumber == 1).Single().ImagePositionPatient;
-        //var secondSlice = _selectedSlicesMetadata.Where(n => n.InstanceNumber == 2).Single().ImagePositionPatient;
-
         var firstSlice = _selectedSlicesMetadata[0].ImagePositionPatient;
         var secondSlice = _selectedSlicesMetadata[1].ImagePositionPatient;
-        Debug.Log("slice 1: " + _selectedSlicesMetadata[0].ImagePositionPatient + "vs" + _selectedSlicesMetadata.Where(n => n.InstanceNumber == 1).Single().ImagePositionPatient);
-        Debug.Log("slice 2: " + _selectedSlicesMetadata[1].ImagePositionPatient + "vs" + _selectedSlicesMetadata.Where(n => n.InstanceNumber == 2).Single().ImagePositionPatient);
-
-        //Debug.Log(String.Join(" ",MainImage.TransformIndexToPhysicalPoint(new VectorInt64() { 0, 0, 0 })));
-        //Debug.Log(String.Join(" ", MainImage.TransformIndexToPhysicalPoint(new VectorInt64() { 199, 199, 199 })));
-
         var sliceDirectionVector = secondSlice - firstSlice; //(R,A,S)
-        Debug.Log(sliceDirectionVector);
-        DicomType dicomType = GetDicomType(sliceDirectionVector);
 
-        if (dicomType == DicomType.NonRotated)
-        {
-            if (Math.Abs(sliceDirectionVector.x) != 0) //Sagittal
-            {
-                if (sliceDirectionVector.x > 0) // from left to right in RAS sys value is to be positive 
-                {
-                    foreach (var slice in _selectedSlicesMetadata)
-                    {
-                        slice.DicomSliceOrder = DicomSliceOrder.LR;
-                    }
-                    _slicesOrientationMatrix.SetRow(2, new Vector4(1, 0, 0, 0));
-                }
-                else if (sliceDirectionVector.x < 0)
-                {
-                    foreach (var slice in _selectedSlicesMetadata)
-                    {
-                        slice.DicomSliceOrder = DicomSliceOrder.RL;
-                    }
-                    _slicesOrientationMatrix.SetRow(2, new Vector4(-1, 0, 0, 0));
-                }
-            }
-            if (Math.Abs(sliceDirectionVector.y) != 0) //Coronal
-            {
-                if (sliceDirectionVector.y > 0) // from posterior to anterior in RAS sys value is to be postitive
-                {
-                    foreach (var slice in _selectedSlicesMetadata)
-                    {
-                        slice.DicomSliceOrder = DicomSliceOrder.PA;
-                    }
-                    _slicesOrientationMatrix.SetRow(2, new Vector4(0, -1, 0, 0));
-                }
-                if (sliceDirectionVector.y < 0)
-                {
-                    foreach (var slice in _selectedSlicesMetadata)
-                    {
-                        slice.DicomSliceOrder = DicomSliceOrder.AP;
-                    }
-                    _slicesOrientationMatrix.SetRow(2, new Vector4(0, 1, 0, 0));
-                }
-            }
-            if (Math.Abs(sliceDirectionVector.z) != 0) //Axial
-            {
-                if (sliceDirectionVector.z > 0) // from inferior to superior in RAS sys value is to be postitive
-                {
-                    foreach (var slice in _selectedSlicesMetadata)
-                    {
-                        slice.DicomSliceOrder = DicomSliceOrder.IS;
-                    }
-                    _slicesOrientationMatrix.SetRow(2, new Vector4(0, 0, 1, 0));
-                }
-                else if (sliceDirectionVector.z < 0)
-                {
-                    foreach (var slice in _selectedSlicesMetadata)
-                    {
-                        slice.DicomSliceOrder = DicomSliceOrder.SI;
-                    }
-                    _slicesOrientationMatrix.SetRow(2, new Vector4(0, 0, -1, 0));
-                }
-            }
-        }
-        if (dicomType == DicomType.Rotated)
-        {
-            foreach (var slice in _selectedSlicesMetadata)
-            {
-                slice.DicomSliceOrder = DicomSliceOrder.RotatedOrder;
-            }
-        }
-        if (dicomType == DicomType.Unknown)
-        {
-            foreach (var slice in _selectedSlicesMetadata)
-            {
-                slice.DicomSliceOrder = DicomSliceOrder.UnknownOrder;
-            }
-        }
-        Debug.Log(_selectedSlicesMetadata[0].DicomSliceOrder);
+        _dicomSliceOrder = GetDicomSliceOrder(sliceDirectionVector);
+
+        _slicesOrientationMatrix.SetRow(0, new Vector4((float)_selectedSlicesMetadata[0].ImageOrientationPatient[0],
+            (float)_selectedSlicesMetadata[0].ImageOrientationPatient[1], (float)_selectedSlicesMetadata[0].ImageOrientationPatient[2], 0));
+        _slicesOrientationMatrix.SetRow(1, new Vector4((float)_selectedSlicesMetadata[0].ImageOrientationPatient[3],
+            (float)_selectedSlicesMetadata[0].ImageOrientationPatient[4], (float)_selectedSlicesMetadata[0].ImageOrientationPatient[5], 0));
+        _slicesOrientationMatrix.SetRow(2, new Vector4((float)sliceDirectionVector[0],
+            sliceDirectionVector[1], sliceDirectionVector[2], 0));
     }
 
     private Vector3 ParseDicomPosition(string dicomPositionString)
@@ -317,31 +234,39 @@ public class DicomDataHandler : MonoBehaviour
         return new Vector3(x, y, z);
     }
 
-    private DicomType GetDicomType(Vector3 vector)
+    private DicomSliceOrder GetDicomSliceOrder(Vector3 vector)
     {
         int nullValueCount = 0;
 
-        if(vector.x != 0) { nullValueCount++; }
-        if(vector.y != 0) { nullValueCount++; }   
-        if(vector.z != 0) { nullValueCount++; }
+        if (vector.x != 0) 
+        { 
+            nullValueCount++; 
+            if(vector.x == +1) { return DicomSliceOrder.LR; }
+            if(vector.x == -1) { return DicomSliceOrder.RL; }
+        }
+        if (vector.y != 0)
+        {
+            nullValueCount++;
+            if (vector.y == +1) { return DicomSliceOrder.AP; }
+            if (vector.y == -1) { return DicomSliceOrder.PA; }
+        }
+        if (vector.z != 0)
+        {
+            nullValueCount++;
+            if (vector.z == +1) { return DicomSliceOrder.IS; }
+            if (vector.z == -1) { return DicomSliceOrder.SI; }
+        }
 
-        if(nullValueCount == 0) { return DicomType.Unknown; }
-        if(nullValueCount == 1) { return DicomType.NonRotated; }
+        if(nullValueCount == 0) { return DicomSliceOrder.UnknownOrder; }
 
-        return DicomType.Rotated;
+        return DicomSliceOrder.RotatedOrder;
     }
 
     private void PrintSlicesOrientationMatrix()
     {
-        Debug.Log(_slicesOrientationMatrix.GetRow(0));
-        Debug.Log(_slicesOrientationMatrix.GetRow(1));
-        Debug.Log(_slicesOrientationMatrix.GetRow(2));
-        Debug.Log(_slicesOrientationMatrix.GetRow(3));
-    }
-
-    private enum DicomType
-    {
-        Unknown = 0, NonRotated = 1, Rotated = 2,
+        Debug.Log("The dicom slice order is: " + _dicomSliceOrder);
+        Debug.Log("The orientation Matrix is: ");
+        Debug.Log(String.Join(" ", _slicesOrientationMatrix));
     }
 }
 
