@@ -240,21 +240,30 @@ public class DicomDataHandler : MonoBehaviour
 
         if (vector.x != 0) 
         { 
-            nullValueCount++; 
-            if(vector.x == +1) { return DicomSliceOrder.LR; }
-            if(vector.x == -1) { return DicomSliceOrder.RL; }
+            nullValueCount++;
+            if (vector.y == 0 && vector.z == 0)
+            {
+                if (vector.x > 0) { return DicomSliceOrder.LR; }
+                if (vector.x < 0) { return DicomSliceOrder.RL; }
+            }
         }
         if (vector.y != 0)
         {
             nullValueCount++;
-            if (vector.y == +1) { return DicomSliceOrder.AP; }
-            if (vector.y == -1) { return DicomSliceOrder.PA; }
+            if (vector.x == 0 && vector.z == 0)
+            {
+                if (vector.y > 0) { return DicomSliceOrder.AP; }
+                if (vector.y < 0) { return DicomSliceOrder.PA; }
+            }
         }
         if (vector.z != 0)
         {
             nullValueCount++;
-            if (vector.z == +1) { return DicomSliceOrder.IS; }
-            if (vector.z == -1) { return DicomSliceOrder.SI; }
+            if(vector.x == 0 && vector.y == 0)
+            {
+                if (vector.z > 0) { return DicomSliceOrder.IS; }
+                if (vector.z < 0) { return DicomSliceOrder.SI; }
+            }
         }
 
         if(nullValueCount == 0) { return DicomSliceOrder.UnknownOrder; }
