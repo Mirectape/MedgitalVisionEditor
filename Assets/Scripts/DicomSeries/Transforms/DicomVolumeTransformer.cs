@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEditor.Localization.LocalizationTableCollection;
 
 public class DicomVolumeTransformer : MonoBehaviour
 {
@@ -73,8 +74,7 @@ public class DicomVolumeTransformer : MonoBehaviour
 
         if (DicomDataHandler.DicomSliceOrder == DicomSliceOrder.RotatedOrder)
         {
-            Debug.LogError("Rotated scans are not supported in this programm yet. If you want to continue, please, format your scans into " +
-                "the non-rotated orthoganal order and upload anew!");
+            ApplyRotationToRotatedOrder(DicomDataHandler.SlicesOrientationMatrix);
         }
         if (DicomDataHandler.DicomSliceOrder == DicomSliceOrder.UnknownOrder)
         {
@@ -85,17 +85,17 @@ public class DicomVolumeTransformer : MonoBehaviour
         _outerObject.transform.RotateAround(_focalPoint, Vector3.up, 180f); // LPS -> RAS
 
         //Check if rotated
-        if (DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.x < -1 ||
-            DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.y < -1 ||
-            DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.z < -1)
-        {
-            if (DicomDataHandler.SelectedSlicesMetadata[10].ImagePositionPatient.x < -1 ||
-                DicomDataHandler.SelectedSlicesMetadata[10].ImagePositionPatient.y < -1 ||
-                DicomDataHandler.SelectedSlicesMetadata[10].ImagePositionPatient.z < -1)
-            {
-                Debug.LogWarning("Image was rotated!");
-            }
-        }
+        //if (DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.x < -1 ||
+        //    DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.y < -1 ||
+        //    DicomDataHandler.SelectedSlicesMetadata[0].ImagePositionPatient.z < -1)
+        //{
+        //    if (DicomDataHandler.SelectedSlicesMetadata[10].ImagePositionPatient.x < -1 ||
+        //        DicomDataHandler.SelectedSlicesMetadata[10].ImagePositionPatient.y < -1 ||
+        //        DicomDataHandler.SelectedSlicesMetadata[10].ImagePositionPatient.z < -1)
+        //    {
+        //        Debug.LogWarning("Image was rotated!");
+        //    }
+        //}
     }
 
     private void ApplyRotationToRightOrder(Matrix4x4 orientationMatrix)
@@ -244,7 +244,20 @@ public class DicomVolumeTransformer : MonoBehaviour
 
     private void ApplyRotationToRotatedOrder(Matrix4x4 orientationMatrix)
     {
+        Vector4[] rows = new Vector4[3];
+        Matrix4x4 rightOrderOrientationMatrix = Matrix4x4.identity;
 
+        for (int i = 0; i < rows.Length; i++)
+        {
+            rows[i] = orientationMatrix.GetRow(i);
+            if (rows[i].x > 0.5f) { rightOrderOrientationMatrix.SetRow(i, LR); }
+            if (rows[i].x < -0.5f) { rightOrderOrientationMatrix.SetRow(i, RL); }
+            if (rows[i].y > 0.5f) { rightOrderOrientationMatrix.SetRow(i, AP); }
+            if (rows[i].y < -0.5f) { rightOrderOrientationMatrix.SetRow(i, PA); }
+            if (rows[i].z > 0.5f) { rightOrderOrientationMatrix.SetRow(i, IS); }
+            if (rows[i].z < -0.5f) { rightOrderOrientationMatrix.SetRow(i, SI); }
+        }
+        ApplyRotationToRightOrder(rightOrderOrientationMatrix);
     }
 
     private void ApplyScale()
