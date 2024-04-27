@@ -98,6 +98,10 @@ public class DicomVolumeTransformer : MonoBehaviour
         //}
     }
 
+    /// <summary>
+    /// Rotation based on the first 2 rows of a given orientation matrix
+    /// </summary>
+    /// <param name="orientationMatrix"></param>
     private void ApplyRotationToRightOrder(Matrix4x4 orientationMatrix)
     {
         Vector4 row1 = orientationMatrix.GetRow(0);
@@ -127,12 +131,12 @@ public class DicomVolumeTransformer : MonoBehaviour
 
                 if (row1 == SI)
                 {
-                    if (row3 == RL)
+                    if (row2 == PA)
                     {
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
                     }
 
-                    if (row3 == LR)
+                    if (row2 == AP)
                     {
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
@@ -140,12 +144,12 @@ public class DicomVolumeTransformer : MonoBehaviour
                 }
                 if (row1 == IS)
                 {
-                    if (row3 == LR)
+                    if (row2 == PA)
                     {
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
                     }
 
-                    if (row3 == RL)
+                    if (row2 == AP)
                     {
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.up, 90f);
@@ -172,12 +176,12 @@ public class DicomVolumeTransformer : MonoBehaviour
 
                 if (row1 == PA)
                 {
-                    if (row3 == RL)
+                    if (row2 == IS)
                     {
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 90f);
                     }
-                    if (row3 == LR)
+                    if (row2 == SI)
                     {
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
@@ -186,12 +190,12 @@ public class DicomVolumeTransformer : MonoBehaviour
                 }
                 if (row1 == AP)
                 {
-                    if (row3 == LR)
+                    if (row2 == IS)
                     {
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.forward, 90f);
                     }
-                    if (row3 == RL)
+                    if (row2 == SI)
                     {
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.right, 180f);
                         _outerObject.transform.RotateAround(_focalPoint, Vector3.right, 90f);
@@ -247,17 +251,59 @@ public class DicomVolumeTransformer : MonoBehaviour
         Vector4[] rows = new Vector4[3];
         Matrix4x4 rightOrderOrientationMatrix = Matrix4x4.identity;
 
-        for (int i = 0; i < rows.Length; i++)
+        for (int i = 0; i < 2; i++)
         {
             rows[i] = orientationMatrix.GetRow(i);
-            if (rows[i].x > 0.5f) { rightOrderOrientationMatrix.SetRow(i, LR); }
-            if (rows[i].x < -0.5f) { rightOrderOrientationMatrix.SetRow(i, RL); }
-            if (rows[i].y > 0.5f) { rightOrderOrientationMatrix.SetRow(i, AP); }
-            if (rows[i].y < -0.5f) { rightOrderOrientationMatrix.SetRow(i, PA); }
-            if (rows[i].z > 0.5f) { rightOrderOrientationMatrix.SetRow(i, IS); }
-            if (rows[i].z < -0.5f) { rightOrderOrientationMatrix.SetRow(i, SI); }
+
+            if (rows[i].x > 0.5f)
+            {
+                if (rows[i].x > rows[i].y && rows[i].x > rows[i].z)
+                {
+                    rightOrderOrientationMatrix.SetRow(i, LR);
+                }
+            }
+
+            if (rows[i].x < -0.5f) //???
+            {
+                if (rows[i].y < 0.5f && rows[i].z < 0.5f && rows[i].x < rows[i].y && rows[i].x < rows[i].z)
+                {
+                    rightOrderOrientationMatrix.SetRow(i, RL);
+                }
+            }
+
+            if (rows[i].y > 0.5f) 
+            {
+                if (rows[i].y > rows[i].x && rows[i].y > rows[i].z)
+                {
+                    rightOrderOrientationMatrix.SetRow(i, AP);
+                }
+            }
+
+            if (rows[i].y < -0.5f) ///???
+            {
+                if (rows[i].x < 0.5f && rows[i].z < 0.5f && rows[i].y < rows[i].x && rows[i].y < rows[i].z)
+                {
+                    rightOrderOrientationMatrix.SetRow(i, PA); 
+                }
+            }
+
+            if(rows[i].z > 0.5f)
+            {
+                if (rows[i].z > rows[i].x && rows[i].z > rows[i].y)
+                {
+                    rightOrderOrientationMatrix.SetRow(i, IS);
+                }
+            }
+
+            if (rows[i].z < -0.5f) ///???
+            {
+                if (rows[i].x < 0.5f && rows[i].y < 0.5f && rows[i].z < rows[i].x && rows[i].z < rows[i].y)
+                {
+                    rightOrderOrientationMatrix.SetRow(i, SI);
+                }
+            }
         }
-        ApplyRotationToRightOrder(rightOrderOrientationMatrix);
+        ApplyRotationToRightOrder(rightOrderOrientationMatrix); 
     }
 
     private void ApplyScale()
