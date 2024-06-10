@@ -184,7 +184,7 @@ public class DicomDataHandler : MonoBehaviour
                     {
                         dicomMetadata.SOPInstanceUID = dicomFile.Dataset.GetString(DicomTag.SOPInstanceUID);
                     }
-                    if (dicomFile.Dataset.Contains(DicomTag.ImageOrientationPatient))
+                    if (dicomFile.Dataset.Contains(DicomTag.ImageOrientationPatient)) 
                     {
                         dicomMetadata.ImageOrientationPatient = dicomFile.Dataset.GetValues<double>(DicomTag.ImageOrientationPatient);
                     }

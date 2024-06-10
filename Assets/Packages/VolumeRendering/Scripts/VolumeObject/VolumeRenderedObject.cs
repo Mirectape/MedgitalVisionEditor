@@ -13,7 +13,7 @@ namespace UnityVolumeRendering
         [SerializeField, HideInInspector]
         public TransferFunction2D transferFunction2D;
 
-        [SerializeField, HideInInspector]
+        [SerializeField]
         public VolumeDataset dataset;
 
         [SerializeField, HideInInspector]

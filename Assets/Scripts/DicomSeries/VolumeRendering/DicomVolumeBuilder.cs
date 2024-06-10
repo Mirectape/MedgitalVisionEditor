@@ -1,7 +1,9 @@
-using itk.simple;
+п»їusing itk.simple;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Jobs;
@@ -80,12 +82,12 @@ public class DicomVolumeBuilder : MonoBehaviour
         JobHandle handle = processBufferJob.Schedule(size, 256);
         handle.Complete();
 
-        // Создаем 3D текстуру
+        // Г‘Г®Г§Г¤Г ГҐГ¬ 3D ГІГҐГЄГ±ГІГіГ°Гі
         _mainTexture = new Texture3D(width, height, depth, TextureFormat.RHalf, false);
         _mainTexture.SetPixelData(pixelBytes, 0);
         _mainTexture.Apply(false, true);
 
-        processBufferJob.InputBuffer.Dispose();  // Освободим память временного буфера
+        processBufferJob.InputBuffer.Dispose();  // ГЋГ±ГўГ®ГЎГ®Г¤ГЁГ¬ ГЇГ Г¬ГїГІГј ГўГ°ГҐГ¬ГҐГ­Г­Г®ГЈГ® ГЎГіГґГҐГ°Г 
         pixelBytes.Dispose();
 
         DateTime t2 = DateTime.Now;
@@ -106,7 +108,7 @@ public class DicomVolumeBuilder : MonoBehaviour
 
     private void ApplyTexturing(VolumeRenderedObject volObj, MeshRenderer meshRenderer)
     {
-        // Применяем текстурирование к объекту
+        // ГЏГ°ГЁГ¬ГҐГ­ГїГҐГ¬ ГІГҐГЄГ±ГІГіГ°ГЁГ°Г®ГўГ Г­ГЁГҐ ГЄ Г®ГЎГєГҐГЄГІГі
         meshRenderer.sharedMaterial = new Material(meshRenderer.sharedMaterial);
         volObj.meshRenderer = meshRenderer;
 
@@ -140,14 +142,14 @@ public class DicomVolumeBuilder : MonoBehaviour
 
     private void CreateObjectInternal(GameObject meshContainer, MeshRenderer meshRenderer, VolumeRenderedObject volObj, GameObject outerObject)
     {
-        // Проверяем наличие метаданных о срезах
+        // ГЏГ°Г®ГўГҐГ°ГїГҐГ¬ Г­Г Г«ГЁГ·ГЁГҐ Г¬ГҐГІГ Г¤Г Г­Г­Г»Гµ Г® Г±Г°ГҐГ§Г Гµ
         if (DicomDataHandler.SelectedSlicesMetadata == null || DicomDataHandler.SelectedSlicesMetadata.Count == 0)
         {
             Debug.LogError("No slice metadata available.");
             return;
         }
 
-        // Инициализация и установка параметров контейнера сетки
+        // Г€Г­ГЁГ¶ГЁГ Г«ГЁГ§Г Г¶ГЁГї ГЁ ГіГ±ГІГ Г­Г®ГўГЄГ  ГЇГ Г°Г Г¬ГҐГІГ°Г®Гў ГЄГ®Г­ГІГҐГ©Г­ГҐГ°Г  Г±ГҐГІГЄГЁ
         UnityEngine.Transform meshContainerTransform = meshContainer.transform;
         UnityEngine.Transform outerObjectTransform = outerObject.transform;
 
@@ -158,11 +160,45 @@ public class DicomVolumeBuilder : MonoBehaviour
         initialBuildingPoint.transform.localPosition = new Vector3(-0.5f, -0.5f, -0.5f);
         initialBuildingPoint.SetParent(outerObjectTransform); //Apply all the matrices to him along with image Volume 
 
+        CreateVolumeDataSet();
+
         onVolumeBuilt?.Invoke(outerObjectTransform);
 
         initialBuildingPoint.SetParent(null); //Remove him from there to get Image origin at (0,0,0)
         InitialBuildingPoint = new Vector3(initialBuildingPoint.localPosition.x,
                                             initialBuildingPoint.localPosition.y,
                                             initialBuildingPoint.localPosition.z);
+
+        VolumeRenderedObject.volumeContainerObject.transform.SetParent(VolumeRenderedObject.transform);
+        ResetTransform(VolumeRenderedObject.volumeContainerObject.transform);
+    }
+
+    private void CreateVolumeDataSet()
+    {
+        // Get all files in DICOM directory
+        List<string> filePaths = Directory.GetFiles(DicomDataHandler.SeriesInfos[0].dirPath).ToList<string>();
+        // Create importer
+        IImageSequenceImporter importer = ImporterFactory.CreateImageSequenceImporter(ImageSequenceFormat.DICOM);
+        // Load list of DICOM series (normally just one series)
+        IEnumerable<IImageSequenceSeries> seriesList = importer.LoadSeries(filePaths);
+        // There will usually just be one series
+        foreach (IImageSequenceSeries series in seriesList)
+        {
+            // Import single DICOm series
+            VolumeDataset dataset = importer.ImportSeries(series);
+            VolumeRenderedObject.dataset = dataset;
+        }
+    }
+
+    private void ResetTransform(UnityEngine.Transform objectToReset)
+    {
+        // Reset position to origin
+        objectToReset.localPosition = Vector3.zero;
+
+        // Reset rotation to identity (no rotation)
+        objectToReset.localRotation = Quaternion.identity;
+
+        // Reset scale to default (1, 1, 1)
+        objectToReset.localScale = Vector3.one;
     }
 }
