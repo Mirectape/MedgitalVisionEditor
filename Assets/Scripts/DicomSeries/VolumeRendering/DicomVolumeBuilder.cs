@@ -163,6 +163,7 @@ public class DicomVolumeBuilder : MonoBehaviour
         CreateVolumeDataSet();
 
         onVolumeBuilt?.Invoke(outerObjectTransform);
+        volObj.transferFunction = TransferFunctionSetter.GetRecalibratedTransferFunction(volObj);
 
         initialBuildingPoint.SetParent(null); //Remove him from there to get Image origin at (0,0,0)
         InitialBuildingPoint = new Vector3(initialBuildingPoint.localPosition.x,

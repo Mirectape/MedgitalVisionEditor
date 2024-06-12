@@ -8,19 +8,35 @@ using Unity.Jobs;
 using UnityEngine;
 using UnityVolumeRendering;
 
-public class TransferFunctionSetter : MonoBehaviour
+public static class TransferFunctionSetter
 {
-    private void Awake()
+    /// <summary>
+    /// Returns recalibrated transfer function in the range of ~ -1000 to 4000 HU for color control points
+    /// </summary>
+    /// <param name="volumeRenderedObject"></param>
+    /// <returns></returns>
+    public static UnityVolumeRendering.TransferFunction GetRecalibratedTransferFunction(VolumeRenderedObject volumeRenderedObject)
     {
-       DicomVolumeBuilder.onVolumeBuilt += AssignVolumeRenderedObject;
-    }
+        UnityVolumeRendering.TransferFunction transferFunction = volumeRenderedObject.transferFunction;
 
-    private void AssignVolumeRenderedObject(UnityEngine.Transform volume)
-    {
-        var volumeRenderedObject = volume.GetComponent<VolumeRenderedObject>();
-        if (volumeRenderedObject.dataset != null) Debug.Log("Dataset is present");
-        Debug.Log("Max value of HU: " + volumeRenderedObject.dataset.GetMinDataValue());
-        Debug.Log("Min value of HU: " + volumeRenderedObject.dataset.GetMaxDataValue());
-    }
+        float minValueHounsfieldHU = volumeRenderedObject.dataset.GetMinDataValue();
+        float maxValueHounsfieldHU = volumeRenderedObject.dataset.GetMaxDataValue();
+        var colourControlPoints = volumeRenderedObject.transferFunction.colourControlPoints; // get only data values
+        float differenceHU = Math.Abs(maxValueHounsfieldHU) - Math.Abs(minValueHounsfieldHU);
 
+
+        //everything that exceeds 5000f needs recalibration
+        if (differenceHU >= 5000)
+        {
+            float ratio = 5000 / (maxValueHounsfieldHU - minValueHounsfieldHU);
+            var newColourControlPoints = new List<TFColourControlPoint>();
+            for(int i = 0; i < colourControlPoints.Count; i++)
+            {
+                newColourControlPoints.Add(new TFColourControlPoint(colourControlPoints[i].dataValue * ratio, colourControlPoints[i].colourValue));
+            }
+            volumeRenderedObject.transferFunction.colourControlPoints = newColourControlPoints;
+            Debug.Log("Transfer function was recalibrated");
+        }
+        return transferFunction;
+    }
 }
