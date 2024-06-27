@@ -1,0 +1,758 @@
+<!doctype html>
+<html>
+<head>
+    <title>FMETP STREAM: FM WebSocket 2.0</title>
+    <script src="lib/gunzip.min.js"></script>
+    <style>
+        table
+        {
+            padding:4px;
+            height:15px;
+            border:2px solid black;
+            border-radius:10px;
+        }
+        td
+        {
+            height:20px;
+        }
+        body
+        {
+          text-align:left;
+        }
+    </style>
+</head>
+<body>
+    <!-- Region Begin: You may commented and remove below script, if you don't need any Demo UI buttons, input Text or any info -->
+    <h2 style="text-align:center"> FMETP STREAM: FM WebSocket 2.0 (Demo Receiver)</h2>
+    <table style="width:100%;">
+        <tr>
+            <th><span id="StatusTextConnection">Status: no connection</span></th>
+            <th>IP Address <input type="text" id="IpAddress" value="http://localhost:3000"></th>
+            <th><button onclick="ConnectAsRoom()"><Strong id="BtnRoomText">JoinOrCreateRoom</Strong></button></th>
+            <th>Room Name <input type="text" id="RoomName" value="MyRoomTest"></th>
+        </tr>
+        <tr>
+            <th><button onclick="FMSendStringToAll('AAA')"><Strong>"A" To All</Strong></button></th>
+            <th><button onclick="FMSendStringToServer('BBB')"><Strong>"B" To Server</Strong></button></th>
+            <th><button onclick="FMSendStringToOthers('CCC')"><Strong>"C" To Others</Strong></button></th>
+        </tr>
+        <tr>
+            <th><button onclick=TestByteToAll(3)><Strong>byte[3] To All</Strong></button></th>
+            <th><button onclick=TestByteToServer(4)><Strong>byte[4] To Server</Strong></button></th>
+            <th><button onclick=TestByteToOthers(5)><Strong>byte[5] To Others</Strong></button></th>
+        </tr>
+
+        <tr>
+            <th><span>Received Data: </span></th>
+            <th><span id="StatusTextString">(string) null</span></th>
+            <th><span id="StatusTextBytes">(byte) null</span></th>
+        </tr>
+        <tr>
+            <th>Video Label <input type="text" id="LabelVideo" value="1001"></th>
+            <th><span id="StatusTextVideoInfo">info: null</span></th>
+            <th><span id="StatusTextVideo">(kB) </span></th>
+        </tr>
+        <tr>
+            <th>Audio Label <input type="text" id="LabelAudio" value="2001"></th>
+            <th><span id="StatusTextAudioInfo">info: null</span></th>
+            <th><span id="StatusTextAudio">(kB) </span></th>
+        </tr>
+    </table>
+
+    </br>
+    <table style="width:100%;">
+      <tr>
+          <th><span id="StatusTextConnection">Experiment Feature: </span></th>
+              <th><span id="StatusTextConnection">HTML Mic Stream</span></th>
+      </tr>
+      <tr>
+          <th>Mic SampleRate <input type="text" id="MicSampleRate" value="24000"></th>
+          <th>Mic Label <input type="text" id="MicLabel" value="2001"></th>
+      </tr>
+      <tr>
+          <th><button onclick=FMStartMicStream('SendToAll')><Strong id="BtnMicTextAll">Mic To All</Strong></button></th>
+          <th><button onclick=FMStartMicStream('SendToServer')><Strong id="BtnMicTextServer">Mic To Server</Strong></button></th>
+          <th><button onclick=FMStartMicStream('SendToOthers')><Strong id="BtnMicTextOthers">Mic To Others</Strong></button></th>
+      </tr>
+    </table>
+    </br>
+    <!-- Region End: You may commented and remove below script, if you don't need any Demo UI buttons, input Text or any info -->
+
+    <!-- The important part of displaying streaming result -->
+    <img id="DisplayImg" src="" width=100% />
+
+    <canvas id="canvas" />
+    <script type="text/javascript">
+        //You may set "canAutoConnectAsClient" to true, and it will automatically connect as client;
+        var canAutoConnectAsClient = false;
+
+        function FMHTML_SetElementById(inputID, inputValue)
+        {
+          try { document.getElementById(inputID).innerHTML = inputValue; } catch{}
+        }
+        function FMHTML_GetElementById(inputID, defaultValue)
+        {
+          try { return document.getElementById(inputID).value; } catch { return defaultValue; }
+        }
+
+        var IP = "http://127.0.0.1:3000/";
+        var label_img = 1001;
+        var dataID_img = 0;
+        var dataLength_img = 0;
+        var receivedLength_img = 0;
+        var dataByte_img = new Uint8Array(0);
+        var ReadyToGetFrame_img = true;
+        var isDesktopFrame = false;
+
+        var label_aud = 2001;
+        var dataID_aud = 0;
+        var dataLength_aud = 0;
+        var receivedLength_aud = 0;
+        var dataByte_aud = new Uint8Array(100);
+        var ReadyToGetFrame_aud = true;
+        var SourceSampleRate = 44100;
+        var SourceChannels = 1;
+        var ABuffer = new Float32Array(0);
+
+        var ws;
+        var roomName="MyRoomTest";
+        var wsid="null";
+
+        //auto init and connect as client
+        if(canAutoConnectAsClient) ConnectAsClient();
+
+        function ResetButtons()
+        {
+          FMHTML_SetElementById("BtnRoomText", "JoinOrCreateRoom");
+          FMHTML_SetElementById("StatusTextConnection", "Status: no connection");
+
+          FMHTML_SetElementById("StatusTextString", "(string) null");
+          FMHTML_SetElementById("StatusTextBytes", "(byte) null");
+          FMHTML_SetElementById("StatusTextVideoInfo", "info: null");
+          FMHTML_SetElementById("StatusTextVideo", "(kB) ");
+          FMHTML_SetElementById("StatusTextAudioInfo", "info: null");
+          FMHTML_SetElementById("StatusTextAudio", "(kB) ");
+        }
+        function FMWebSocketDisconnect()
+        {
+            if(ws != null)
+            {
+              ws.close();
+              ws = null;
+              ResetButtons();
+            }
+        }
+
+        function FMWebSocketEvent(inputType, inputVariable) { ws.send("fmevent" + ":" + inputType + ":" + inputVariable); }
+        function ConnectAsRoom()
+        {
+            roomName = FMHTML_GetElementById("RoomName", roomName);
+            if(ws != null) { FMWebSocketDisconnect(); }
+            else { FMWebSocketConnect("Room",roomName); }
+        }
+
+        function FMWebSocketConnect(inputNetworkType, inputRoomName)
+        {
+            function RegisterRoom() { FMWebSocketEvent("roomName", inputRoomName); }
+
+            function FMEventEncode(inputType, inputVariable) { return "fmevent" + ":" + inputType + ":" + inputVariable; }
+            function FMEventDecode(inputString) { return inputString.split(":"); }
+            function OnMessageCheck(message)
+            {
+               console.log('OnMessageCheck:' + message);
+               if (message.includes("fmevent:"))
+               {
+                 var decodedResult = FMEventDecode(message);
+                 var decodedType = decodedResult[1];
+                 var decodedValue = decodedResult[2];
+                 switch(decodedType)
+                 {
+                   case 'OnReceivedWSIDEvent':
+                    wsid = decodedValue;
+                    break;
+                   case 'OnJoinedLobbyEvent':
+                    RegisterRoom();
+                    break;
+                   }
+               }
+            }
+            IP = FMHTML_GetElementById("IpAddress", IP);
+            IP = IP.replace('http://', 'ws://');
+            IP = IP.replace('https://', 'wss://');
+            console.log(IP);
+            ws = new WebSocket(IP);
+            ws.binaryType = 'arraybuffer';
+
+            function RegisterNetworkType() { FMWebSocketEvent("networkType", inputNetworkType); }
+
+            ws.addEventListener('open', (event) => {
+              RegisterNetworkType();
+              console.log("**connected to server");
+            });
+
+            ws.onclose = function (evt){
+              console.log("**close");
+              ResetButtons();
+              if (MicRecording) FMStopMicStream();
+            }
+            ws.onerror = function (evt){
+              console.log("**error");
+              FMWebSocketDisconnect();
+              ResetButtons();
+            }
+            ws.onmessage = function (evt) {
+                FMHTML_SetElementById("StatusTextConnection", "Room: " + (roomName) + "(wsid: " + wsid + ")" + "\n" + new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds());
+                FMHTML_SetElementById("BtnRoomText", "Disconnect");
+
+                var data = evt.data;
+
+                if (typeof evt.data === "string")
+                {
+                  //console.log('string data!');
+                  OnMessageCheck(new String(evt.data));
+                }
+
+                if(evt.data instanceof ArrayBuffer)
+                {
+                  var _byteRaw = new Uint8Array(evt.data);
+                  var _byteData;
+                  if (_byteRaw[1] === 3)
+                  {
+                    var _wsidByteLength = ByteToInt16(_byteRaw, 4);
+                    _byteData = _byteRaw.slice(_wsidByteLength + 6, _byteRaw.length);
+                  }
+                  else
+                  {
+                      _byteData = _byteRaw.slice(4, _byteRaw.length);
+                  }
+
+                  // FMETP: first byte defines the whole data type..., 0 is raw, 1 is string
+                  if(_byteRaw[0] === 0)
+                  {
+                    // document.getElementById("StatusTextBytes").innerHTML = "(byte)" + _byteData.length;
+                    FMHTML_SetElementById("StatusTextBytes", "(byte)" + _byteData.length);
+
+                    if(_byteData.length > 18)
+                    {
+                      label_img = FMHTML_GetElementById("LabelVideo", label_img);
+                      label_aud = FMHTML_GetElementById("LabelAudio", label_aud);
+
+                      var _label = ByteToInt16(_byteData, 0);
+                      // console.log(_byteData.length + ': ' + _label); //Debug label
+
+                      if (_label == label_img)
+                      {
+                        var _dataID = ByteToInt16(_byteData, 2);
+                        if (_dataID != dataID_img) receivedLength_img = 0;
+                        dataID_img = _dataID;
+                        dataLength_img = ByteToInt32(_byteData, 4);
+                        var _offset = ByteToInt32(_byteData, 8);
+                        var _GZipMode = (_byteData[12] == 1) ? true : false;
+
+                        //check if the texture is Desktop frame?
+                        isDesktopFrame = (_byteData[14] != 0) ? true : false;
+                        var metaByteLength = isDesktopFrame ? 24 : 15;
+
+                        if (receivedLength_img == 0) dataByte_img = new Uint8Array(dataLength_img);
+                        var chunkLength = _byteData.length - metaByteLength;
+                        if (_offset + chunkLength <= dataByte_img.length)
+                        {
+                          //----------------add byte----------------
+                          receivedLength_img += chunkLength;
+                          dataByte_img = CombineInt8Array(dataByte_img, _byteData.slice(metaByteLength, _byteData.length), _offset);
+                          //----------------add byte----------------
+                        }
+
+                        if (ReadyToGetFrame_img)
+                        {
+                            if (receivedLength_img == dataLength_img) ProcessImageData(dataByte_img, _GZipMode);
+                        }
+                      }
+                      else if (_label == label_aud)
+                      {
+                          var _dataID = ByteToInt32(_byteData, 2);
+                          if (_dataID != dataID_aud) receivedLength_aud = 0;
+
+                          dataID_aud = _dataID;
+                          dataLength_aud = ByteToInt32(_byteData, 4);
+                          var _offset = ByteToInt32(_byteData, 8);
+                          var _GZipMode = (_byteData[12] == 1) ? true : false;
+
+                          if (receivedLength_aud == 0) dataByte_aud = new Uint8Array(dataLength_aud);
+                          receivedLength_aud += _byteData.length - 14;
+                          //----------------add byte----------------
+                          dataByte_aud = CombineInt8Array(dataByte_aud, _byteData.slice(14, _byteData.length), _offset);
+                          //----------------add byte----------------
+                          if (ReadyToGetFrame_aud)
+                          {
+                              if (receivedLength_aud == dataLength_aud) ProcessAudioData(dataByte_aud, _GZipMode);
+                          }
+                      }
+                    }
+                  }
+                  if(_byteRaw[0] === 1)
+                  {
+                    var stringData = '';
+                    //----conver byte[] to Base64 string----
+                    var len = _byteData.byteLength;
+                    for (var i = 0; i < len; i++)
+                    {
+                        stringData += String.fromCharCode(_byteData[i]);
+                    }
+                    //----conver byte[] to Base64 string----
+                    document.getElementById("StatusTextString").innerHTML = "(string)" + stringData;
+                  }
+                }
+              };
+
+            var startTime = 0;
+            var audioCtx = new AudioContext();
+
+            function ProcessAudioData(_byte, _GZipMode)
+            {
+                ReadyToGetFrame_aud = false;
+
+                var bytes = new Uint8Array(_byte);
+                if(_GZipMode)
+                {
+                   var gunzip = new Zlib.Gunzip (bytes);
+                   bytes = gunzip.decompress();
+                }
+
+                //read meta data
+                SourceSampleRate = ByteToInt32(bytes, 0);
+                SourceChannels = ByteToInt32(bytes, 4);
+
+                //conver byte[] to float
+                var BufferData = bytes.slice(8, bytes.length);
+                var AudioInt16 = new Int16Array(BufferData.buffer);
+
+                //=====================playback=====================
+                if(AudioInt16.length > 0) StreamAudio(SourceChannels, AudioInt16.length, SourceSampleRate, AudioInt16);
+                //=====================playback=====================
+
+                ReadyToGetFrame_aud = true;
+                document.getElementById("StatusTextAudioInfo").innerHTML = "info: " + SourceChannels + "x" + SourceSampleRate + " | " + (_GZipMode ? ("Zip("+Math.round((_byte.length/bytes.length) * 100) + "%)") : "Raw");
+                document.getElementById("StatusTextAudio").innerHTML = "(kB)" + Math.round(_byte.length/1000);
+            }
+
+            function StreamAudio(NUM_CHANNELS, NUM_SAMPLES, SAMPLE_RATE, AUDIO_CHUNKS)
+            {
+                var audioBuffer = audioCtx.createBuffer(NUM_CHANNELS, (NUM_SAMPLES / NUM_CHANNELS), SAMPLE_RATE);
+                for (var channel = 0; channel < NUM_CHANNELS; channel++)
+                {
+                    // This gives us the actual ArrayBuffer that contains the data
+                    var nowBuffering = audioBuffer.getChannelData(channel);
+                    for (var i = 0; i < NUM_SAMPLES; i++)
+                    {
+                        var order = i * NUM_CHANNELS + channel;
+                        var localSample = 1.0/32767.0;
+                        localSample *= AUDIO_CHUNKS[order];
+                        nowBuffering[i] = localSample;
+                    }
+                }
+
+                var source = audioCtx.createBufferSource();
+                source.buffer = audioBuffer;
+
+                source.connect(audioCtx.destination);
+                source.start(startTime);
+
+                startTime += audioBuffer.duration;
+            }
+
+            function ProcessImageData(_byte, _GZipMode)
+            {
+                ReadyToGetFrame_img = false;
+                var binary = '';
+                var bytes = new Uint8Array(_byte);
+                var foundError = false;
+                if(_GZipMode)
+                {
+                    var gunzip = new Zlib.Gunzip (bytes);
+                    try { bytes = gunzip.decompress(); }
+                    catch (error)
+                    {
+                        console.error(error);
+                        foundError = true;
+                        ReadyToGetFrame_img = true;
+                    }
+                }
+
+                if(!foundError)
+                {
+                    //----conver byte[] to Base64 string----
+                    var len = bytes.byteLength;
+                    for (var i = 0; i < len; i++)
+                    {
+                        binary += String.fromCharCode(bytes[i]);
+                    }
+                    //----conver byte[] to Base64 string----
+
+                    //----display image----
+                    var img = document.getElementById('DisplayImg');
+                    img.src = 'data:image/jpeg;base64,' + btoa(binary);
+                    //img.width = data.Width;
+                    //img.height = data.Height;
+                    //----display image----
+
+                    ReadyToGetFrame_img = true;
+                    FMHTML_SetElementById("StatusTextVideoInfo", "info: " + img.width + "x" + img.height + " | " + (_GZipMode ? ("Zip("+Math.round((_byte.length/bytes.length) * 100) + "%)") : "Raw"));
+                    FMHTML_SetElementById("StatusTextVideo", "(kB)" + Math.round(_byte.length/1000));
+                }
+            }
+        }
+
+        function CombineInt8Array(a, b, offset)
+        {
+            var c = new Int8Array(a.length);
+            c.set(a);
+            c.set(b, offset);
+            return c;
+        }
+
+        function CombineFloat32Array(a, b)
+        {
+            var c = new Float32Array(a.length + b.length);
+            c.set(a);
+            c.set(b, a.length);
+            return c;
+        }
+
+        function ByteToInt32(_byte, _offset)
+        {
+            return (_byte[_offset] & 255) + ((_byte[_offset + 1] & 255) << 8) + ((_byte[_offset + 2] & 255) << 16) + ((_byte[_offset + 3] & 255) << 24);
+            //return _byte[_offset] + _byte[_offset + 1] * 256 + _byte[_offset + 2] * 256 * 256 + _byte[_offset + 3] * 256 * 256 * 256;
+        }
+        function ByteToInt16(_byte, _offset) { return (_byte[_offset] & 255) + ((_byte[_offset + 1] & 255) << 8); }
+
+        function FMSendStringToAll(_string)
+        {
+          var _stringBytes = Uint8Array.from(_string, (x) => x.charCodeAt(0));
+          var _meta = new Uint8Array(4);
+          _meta[0] = 1;
+          _meta[1] = 0;
+          var _sendByte = new Uint8Array(_meta.length + _stringBytes.length);
+          _sendByte = CombineInt8Array(_sendByte, _meta, 0);
+          _sendByte = CombineInt8Array(_sendByte, _stringBytes, 4);
+          ws.send(_sendByte);
+        }
+        function FMSendStringToServer(_string)
+        {
+          var _stringBytes = Uint8Array.from(_string, (x) => x.charCodeAt(0));
+          var _meta = new Uint8Array(4);
+          _meta[0] = 1;
+          _meta[1] = 1;
+          var _sendByte = new Uint8Array(_meta.length + _stringBytes.length);
+          _sendByte = CombineInt8Array(_sendByte, _meta, 0);
+          _sendByte = CombineInt8Array(_sendByte, _stringBytes, 4);
+          ws.send(_sendByte);
+        }
+        function FMSendStringToOthers(_string)
+        {
+          var _stringBytes = Uint8Array.from(_string, (x) => x.charCodeAt(0));
+          var _meta = new Uint8Array(4);
+          _meta[0] = 1;
+          _meta[1] = 2;
+          var _sendByte = new Uint8Array(_meta.length + _stringBytes.length);
+          _sendByte = CombineInt8Array(_sendByte, _meta, 0);
+          _sendByte = CombineInt8Array(_sendByte, _stringBytes, 4);
+          ws.send(_sendByte);
+        }
+
+        function FMSendByteToAll(inputDataByte)
+        {
+          var _meta = new Uint8Array(4);
+          _meta[0] = 0;
+          _meta[1] = 0;
+          var _sendByte = new Uint8Array(inputDataByte.length + _meta.length);
+          _sendByte = CombineInt8Array(_sendByte, _meta, 0);
+          _sendByte = CombineInt8Array(_sendByte, inputDataByte, 4);
+          ws.send(_sendByte);
+        }
+        function FMSendByteToServer(inputDataByte)
+        {
+          var _meta = new Uint8Array(4);
+          _meta[0] = 0;
+          _meta[1] = 1;
+          var _sendByte = new Uint8Array(inputDataByte.length + _meta.length);
+          _sendByte = CombineInt8Array(_sendByte, _meta, 0);
+          _sendByte = CombineInt8Array(_sendByte, inputDataByte, 4);
+          ws.send(_sendByte);
+        }
+        function FMSendByteToOthers(inputDataByte)
+        {
+          var _meta = new Uint8Array(4);
+          _meta[0] = 0;
+          _meta[1] = 2;
+          var _sendByte = new Uint8Array(inputDataByte.length + _meta.length);
+          _sendByte = CombineInt8Array(_sendByte, _meta, 0);
+          _sendByte = CombineInt8Array(_sendByte, inputDataByte, 4);
+          ws.send(_sendByte);
+        }
+
+        function FMSendByte(inputDataByte, inputSendType)
+        {
+          switch(inputSendType)
+          {
+            case "SendToAll": FMSendByteToAll(inputDataByte); break;
+            case "SendToServer": FMSendByteToServer(inputDataByte); break;
+            case "SendToOthers": FMSendByteToOthers(inputDataByte); break;
+          }
+        }
+        function TestByteToAll(_DataByteLength) { FMSendByteToAll(new Uint8Array(_DataByteLength)); }
+        function TestByteToServer(_DataByteLength) { FMSendByteToServer(new Uint8Array(_DataByteLength)); }
+        function TestByteToOthers(_DataByteLength) { FMSendByteToOthers(new Uint8Array(_DataByteLength)); }
+
+        ////////// Experiment Feature, HTML Mic To Others //////////
+        var MicRecorder;
+        var MicRecording = false;
+        function FMStopMicStream()
+        {
+          if(MicRecorder != null) MicRecorder.disconnect();
+          document.getElementById("BtnMicTextAll").innerHTML = "Mic To All";
+          document.getElementById("BtnMicTextServer").innerHTML = "Mic To Server";
+          document.getElementById("BtnMicTextOthers").innerHTML = "Mic to Others";
+        }
+        function FMStartMicStream(inputSendType)
+        {
+          if(ws == null)
+          {
+            console.log("websocket not ready yet, mic stream won't start");
+            return;
+          }
+
+          var OutputFormat = "FMPCM16";//"FMPCM16","PCM16"
+          var OutputSampleRate = 24000;//48000;//22050;
+          var OutputChannels = 1;
+          var maxID = 1024;
+          var chunkSize = 1400;
+          var dataID = 0;
+          var label_mic = 2001;
+
+          OutputSampleRate = document.getElementById("MicSampleRate").value;
+          label_mic = document.getElementById("MicLabel").value;
+
+          if(MicRecording == false)
+          {
+              MicRecording = true;
+              document.getElementById("BtnMicTextAll").innerHTML = "Stop Mic";
+              document.getElementById("BtnMicTextServer").innerHTML = "Stop Mic";
+              document.getElementById("BtnMicTextOthers").innerHTML = "Stop Mic";
+          }
+          else
+          {
+              MicRecording = false;
+              FMStopMicStream();
+              return;
+          }
+
+          function Int32ToByte4Array(_int32) { return [_int32 & 0xff, (_int32 >> 8) & 0xff, (_int32 >> 16) & 0xff, (_int32 >> 24) & 0xff] }
+          function Int16ToByte(_int16) { return [_int16 & 0xff, (_int16 >> 8) & 0xff] }
+          function ByteToInt16(_byte, _offset)
+          {
+              return (_byte[_offset] & 255) + ((_byte[_offset + 1] & 255) << 8);
+          }
+          function FMStreamAudioByte(_inputAudioData)
+          {
+            //1. check Output format
+            var _dataByteTempAudio = new Uint8Array(_inputAudioData.length);
+            if(OutputFormat == "FMPCM16")
+            {
+              var _samplerateByte = Int32ToByte4Array(OutputSampleRate);
+              var _channelsByte = Int32ToByte4Array(OutputChannels);
+
+              //FMPCM16 format: increase the byte[] length with audio info
+              _dataByteTempAudio = new Uint8Array(_samplerateByte.length + _channelsByte.length + _inputAudioData.length);
+              _dataByteTempAudio = CombineInt8Array(_dataByteTempAudio, _samplerateByte, 0);
+              _dataByteTempAudio = CombineInt8Array(_dataByteTempAudio, _channelsByte, 4);
+              _dataByteTempAudio = CombineInt8Array(_dataByteTempAudio, _inputAudioData, 8);
+            }
+            else
+            {
+              _dataByteTempAudio = CombineInt8Array(_dataByteTempAudio, _inputAudioData, 0);
+            }
+
+            //2. splitting audio data into chunks...
+            var _length = _dataByteTempAudio.length;
+            var _offset = 0;
+            var _meta_label = Int16ToByte(label_mic);
+            var _meta_id = Int16ToByte(dataID);
+            var _meta_length = Int16ToByte(_length);
+
+            var chunks = Math.ceil(_length / chunkSize);
+            var metaByteLength = 14;
+
+            var _GZipMode = new Uint8Array(1);
+            _GZipMode[0] = 0;
+            var _ByteZero = new Uint8Array(1);
+            _ByteZero[0] = 0;
+
+            for (var i = 1; i <= chunks; i++)
+            {
+              var dataByteLength = (i == chunks) ? (_length % chunkSize) : (chunkSize);
+
+              if(OutputFormat == "FMPCM16")
+              {
+                var _meta_offset = Int32ToByte4Array(_offset);
+                var _sendByte = new Uint8Array(dataByteLength + metaByteLength);
+
+                _sendByte = CombineInt8Array(_sendByte, _meta_label, 0);
+                _sendByte = CombineInt8Array(_sendByte, _meta_id, 2);
+                _sendByte = CombineInt8Array(_sendByte, _meta_length, 4);
+                _sendByte = CombineInt8Array(_sendByte, _meta_offset, 8);
+                _sendByte = CombineInt8Array(_sendByte, _GZipMode, 12);
+                _sendByte = CombineInt8Array(_sendByte, _ByteZero, 13);
+
+                _sendByte = CombineInt8Array(_sendByte, _dataByteTempAudio.slice(_offset, _offset + dataByteLength), 14);
+              }
+              else
+              {
+                var _sendByte = new Uint8Array(dataByteLength);
+                _sendByte = CombineInt8Array(_sendByte, _dataByteTempAudio.slice(_offset, _offset + dataByteLength), 0);
+              }
+
+              //3. Stream data via FMWebSocket
+              FMSendByte(_sendByte, inputSendType);
+              _offset = _offset + chunkSize;
+            }
+            dataID = dataID + 1;
+
+            if (dataID > maxID) dataID = 0;
+          }
+
+          //old method but not work: not sure how to get PCM16 correctly...?
+          /*
+          navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream)
+          {
+            recorder = new MediaRecorder(stream);
+            if (recorder.state === "recording")
+            {
+              recorder.stop();
+            }
+            else
+            {
+              recorder.start(1000);
+              recorder.addEventListener('dataavailable', (async event => {
+                if (typeof event.data === 'undefined') return;
+                if (event.data.size === 0) return;
+                event.data.arrayBuffer().then(buffer => FMStreamAudioByteToAll(new Uint8Array(buffer)) );
+              }));
+            }
+          });
+          */
+
+          //new method, ref: https://medium.com/@ragymorkos/8d4abf81164d
+          /*
+          // Seems Safari not working, which require mediaDevices checking instead...
+          // navigator.getUserMedia = navigator.getUserMedia ||  navigator.webkitGetUserMedia ||  navigator.mozGetUserMedia ||  navigator.msGetUserMedia;
+          // if (navigator.getUserMedia)
+          // {
+          //    navigator.getUserMedia({ audio: true}, function(stream){ FMCaptureMicStream(stream); }, function(error){ console.log('Error capturing audio.'); } );
+          // } else { console.log('getUserMedia not supported in this browser.'); }
+          */
+
+          //tested on mac
+          navigator.getUserMedia = navigator.getUserMedia ||  navigator.webkitGetUserMedia ||  navigator.mozGetUserMedia ||  navigator.msGetUserMedia;
+          if (navigator.mediaDevices)
+          {
+              navigator.mediaDevices.getUserMedia({ audio: true})
+              .then((stream) => {
+                /* use the stream */
+                FMCaptureMicStream(stream); console.log("mediaDevices exist stream!");
+              })
+              .catch((err) => {
+                /* handle the error */
+                console.log('Error capturing audio.');
+              });
+          }
+          else
+          {
+              if (navigator.getUserMedia)
+              {
+                 navigator.getUserMedia({ audio: true}, function(stream){ FMCaptureMicStream(stream); }, function(error){ console.log('Error capturing audio.'); } );
+              } else { console.log('getUserMedia not supported in this browser.'); }
+          }
+
+          function FMCaptureMicStream(audioStream)
+          {
+            // creates the an instance of audioContext
+            const micAudioContext = new AudioContext();
+            const sampleRate = micAudioContext.sampleRate; //retrieve the current sample rate of microphone the browser is using
+            micAudioContext.sampleRate = sampleRate;
+
+            const volume = micAudioContext.createGain(); //creates a gain node
+            const audioInput = micAudioContext.createMediaStreamSource(audioStream); //creates an audio node from the microphone incoming stream
+            audioInput.connect(volume); //connect the stream to the gain node
+
+            const bufferSize = 2048;
+            const recorder = (micAudioContext.createScriptProcessor ||  micAudioContext.createJavaScriptNode).call(micAudioContext, bufferSize, 1, 1);
+            MicRecorder = recorder;
+
+            recorder.onaudioprocess = function(event){
+               const samples = event.inputBuffer.getChannelData(0);
+
+               //Adjust sample
+               var PCM16iBytes;
+               if(OutputSampleRate < sampleRate)
+               {
+                 var PCM16iDownSample = downsampleAudioPCMArray(samples, sampleRate, OutputSampleRate);
+                 PCM16iBytes = PCM32fArrayToPCM16Bytes(PCM16iDownSample);
+               }
+               else
+               {
+                 PCM16iBytes = PCM32fArrayToPCM16Bytes(samples);
+               }
+               FMStreamAudioByte(PCM16iBytes);
+            };
+            volume.connect(recorder); //connect recorder
+            recorder.connect(micAudioContext.destination); //start recording
+          }
+
+          function PCM32fArrayToPCM16Bytes(_PCM32f)
+          {
+            var result_bytes = new Int8Array(_PCM32f.length * 2); //2 bytes per int16
+            for (let i = 0; i < _PCM32f.length; i++)
+            {
+               let val = Math.floor(32767 * _PCM32f[i]);
+               val = Math.min(32767, val);
+               val = Math.max(-32768, val);
+
+               var valInt8Byte = Int16ToByte(val);
+               var index = i * 2;
+               result_bytes[index] = valInt8Byte[0];
+               result_bytes[index + 1] = valInt8Byte[1];
+            }
+            return result_bytes;
+          }
+
+          //ref: https://stackoverflow.com/questions/52787510
+          function downsampleAudioPCMArray(buffer, fromSampleRate, toSampleRate)
+          {
+             // buffer is a Float32Array
+             var sampleRateRatio = Math.round(fromSampleRate / toSampleRate);
+             var newLength = Math.round(buffer.length / sampleRateRatio);
+
+             var result = new Float32Array(newLength);
+             var offsetResult = 0;
+             var offsetBuffer = 0;
+             while (offsetResult < result.length)
+             {
+                 var nextOffsetBuffer = Math.round((offsetResult + 1) * sampleRateRatio);
+                 var accum = 0, count = 0;
+                 for (var i = offsetBuffer; i < nextOffsetBuffer && i < buffer.length; i++)
+                 {
+                     accum += buffer[i];
+                     count++;
+                 }
+                 result[offsetResult] = accum / count;
+                 offsetResult++;
+                 offsetBuffer = nextOffsetBuffer;
+             }
+             return result;
+          }
+        //new method end
+        }
+      </script>
+</body>
+</html>
