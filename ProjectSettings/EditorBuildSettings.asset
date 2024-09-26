@@ -5,12 +5,15 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/SplashScreen.unity
     guid: 34a42d773dcd59a4db4788a42d92fea9
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Main.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/InputSystem/TestScene.unity
+    guid: 6953a5908939be5439c8e72921037a78
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: 6f969194f69ea04419a60b3e518bfc5b, type: 2}
     com.unity.input.settings: {fileID: 11400000, guid: 80e519a7b9c9a3442a35c6403f7784dd, type: 2}

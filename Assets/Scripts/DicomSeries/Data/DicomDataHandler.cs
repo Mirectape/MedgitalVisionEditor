@@ -9,7 +9,6 @@ using itk.simple;
 using System.Text;
 using System.Linq;
 using FellowOakDicom.Imaging.Reconstruction;
-using UnityEditor.SceneManagement;
 using openDicom.File;
 
 public class DicomDataHandler : MonoBehaviour
