@@ -101,6 +101,39 @@
                     "isPartOfComposite": false
                 },
                 {
+                    "name": "MouseMiddleButton",
+                    "id": "1b578666-44be-43e1-9a4b-97fc6fb465b0",
+                    "path": "OneModifier",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Movement",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "modifier",
+                    "id": "513833e2-38bc-4b7f-aa1a-4951c7fca19c",
+                    "path": "<Mouse>/middleButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "binding",
+                    "id": "e9d9ac68-187f-4395-a616-bf8d09661e99",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Movement",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
                     "name": "",
                     "id": "d8567fd8-2fc4-466c-8c81-41e6eb13c61d",
                     "path": "<Gamepad>/rightStick",
