@@ -15,6 +15,9 @@ public class CameraController : MonoBehaviour
     private InputAction _movement;
     private InputAction _rotation;
     private InputAction _zoom;
+    private InputAction _drag;
+
+    private bool _cameraIsDragged; // in need to avoid overlapping between PanCamera and DragCamera functions
 
     private void Awake()
     {
@@ -26,6 +29,7 @@ public class CameraController : MonoBehaviour
         _movement = _cameraActions.Camera.Movement;
         _rotation = _cameraActions.Camera.Rotate;
         _zoom = _cameraActions.Camera.Zoom;
+        _drag = _cameraActions.Camera.Drag;
         _cameraActions.Camera.Enable();
     }
 
@@ -36,5 +40,12 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
+        CameraBrain.Instance.PanCamera(_movement.ReadValue<Vector2>());
+        CameraBrain.Instance.DragCamera(_drag);
+        CameraBrain.Instance.RotateCamera(_rotation.ReadValue<Vector2>());
+        CameraBrain.Instance.ZoomCamera(_zoom.ReadValue<Vector2>());
+        CameraBrain.Instance.UseMovetracking();
     }
+
+
 }

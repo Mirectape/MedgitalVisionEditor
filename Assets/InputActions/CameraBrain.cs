@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 public class CameraBrain : MonoBehaviour
 {
     private static CameraBrain _instance;
-    public CameraBrain Instance {  get { return _instance; } }
+    public static CameraBrain Instance {  get { return _instance; } }
 
     public Camera camera;
     private Transform _cameraTransform;
@@ -72,21 +72,22 @@ public class CameraBrain : MonoBehaviour
     }
 
     /// <summary>
-    /// Use in updates
+    /// Use in updates with other methods to make those methods active
     /// </summary>
     /// <param name="inputValue"></param>
-    public void UseMovetracking(Vector2 inputValue)
+    public void UseMovetracking()
     {
-        UpdatePanMovement(inputValue);
-        RotateCamera(inputValue);
-        ZoomCamera(inputValue);
-
         UpdateVelocity();
         UpdateCameraPosition();
         UpdateBasePosition();
     }
 
-    private void UpdatePanMovement(Vector2 inputValue)
+    /// <summary>
+    /// Use alnogside with UseMovetracking in updates if necessary. 
+    /// Use this function to pun around with buttons or joystick
+    /// </summary>
+    /// <param name="inputValue"></param>
+    public void PanCamera(Vector2 inputValue)
     {
         Vector3 movementValue = inputValue.x * GetCameraRight() +
             inputValue.y * GetCameraUp();
@@ -100,10 +101,10 @@ public class CameraBrain : MonoBehaviour
     }
 
     /// <summary>
-    /// Separate from other functional. Use alnogside with UseMovetracking in updates if necessary. 
+    /// Use alnogside with UseMovetracking in updates if necessary. 
     /// Use this func to pan around with mouse or alternative 
     /// </summary>
-    private void DragCamera(InputAction movement)
+    public void DragCamera(InputAction movement)
     {
         if (!movement.IsPressed())
         {
@@ -127,7 +128,11 @@ public class CameraBrain : MonoBehaviour
         }
     }
 
-    private void RotateCamera(Vector2 inputValue)
+    /// <summary>
+    /// Use alnogside with UseMovetracking in updates if necessary. 
+    /// </summary>
+    /// <param name="inputValue"></param>
+    public void RotateCamera(Vector2 inputValue)
     {
         float value_x = inputValue.x;
         float value_y = inputValue.y;
@@ -137,7 +142,11 @@ public class CameraBrain : MonoBehaviour
         _planeNormal = transform.rotation * Vector3.forward;
     }
 
-    private void ZoomCamera(Vector2 inputValue)
+    /// <summary>
+    /// Use alnogside with UseMovetracking in updates if necessary. 
+    /// </summary>
+    /// <param name="inputValue"></param>
+    public void ZoomCamera(Vector2 inputValue)
     {
         float valueStrength = 0.01f;
         float value = -inputValue.y * valueStrength;

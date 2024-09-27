@@ -175,6 +175,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 443774051}
+  - component: {fileID: 443774053}
   - component: {fileID: 443774052}
   m_Layer: 0
   m_Name: CameraRig
@@ -211,11 +212,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33c73b9af1ef5f5439682bed8ee67b54, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _fmManager: {fileID: 1946478051}
+--- !u!114 &443774053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 443774049}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1975a46b0282e554aae4dc4fa18db40f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  camera: {fileID: 516062600}
   _maxSpeed: 5
   _acceleration: 10
   _damping: 5
-  _stepSize: 2
+  _stepSize: 0.3
   _zoomDampening: 7.5
   _minDistance: 0.5
   _maxDistance: 50
