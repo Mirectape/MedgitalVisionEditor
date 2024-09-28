@@ -1,13 +1,10 @@
 using FMSolution.FMNetwork;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FMNetworkHandler : MonoBehaviour
 {
     private Transform _cameraTransform;
-
 
     public GameObject[] Objects;
 
