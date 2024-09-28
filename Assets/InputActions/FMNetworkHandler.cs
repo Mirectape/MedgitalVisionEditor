@@ -10,9 +10,9 @@ public class FMNetworkHandler : MonoBehaviour
 
     [SerializeField] private FMNetworkManager _fmManager;
 
-    private void Update()
+    private void FixedUpdate()
     {
-        //try to send/sync in each update 
+        //try to send/sync in each fixed update 
         ActionEncoderTransformation();
     }
 

@@ -34,7 +34,7 @@ public class CameraController : MonoBehaviour
         _cameraActions.Disable();
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         CameraBrain.Instance.PanCamera(_movement.ReadValue<Vector2>());
         CameraBrain.Instance.DragCamera(_drag);
@@ -78,7 +78,6 @@ public class CameraController : MonoBehaviour
         {
             _fmManager.SendToOthers(sendBytes);
         }
-        
     }
 
     public void ActionDecodeTransformation(byte[] receivedBytes)

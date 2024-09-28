@@ -69,7 +69,7 @@ public class CameraBrain : MonoBehaviour
     }
 
     /// <summary>
-    /// Use in updates with other methods to make those methods active
+    /// Use in fixed updates with other methods to make those methods active
     /// </summary>
     /// <param name="inputValue"></param>
     public void UseMovetracking()
@@ -80,7 +80,7 @@ public class CameraBrain : MonoBehaviour
     }
 
     /// <summary>
-    /// Use alnogside with UseMovetracking in updates if necessary. 
+    /// Use alnogside with UseMovetracking in fixed updates if necessary. 
     /// Use this function to pun around with buttons or joystick
     /// </summary>
     /// <param name="inputValue"></param>
@@ -98,7 +98,7 @@ public class CameraBrain : MonoBehaviour
     }
 
     /// <summary>
-    /// Use alnogside with UseMovetracking in updates if necessary. 
+    /// Use alnogside with UseMovetracking in fixed updates if necessary. 
     /// Use this func to pan around with mouse or alternative 
     /// </summary>
     public void DragCamera(InputAction movement)
@@ -126,7 +126,7 @@ public class CameraBrain : MonoBehaviour
     }
 
     /// <summary>
-    /// Use alnogside with UseMovetracking in updates if necessary. 
+    /// Use alnogside with UseMovetracking in fixed updates if necessary. 
     /// </summary>
     /// <param name="inputValue"></param>
     public void RotateCamera(Vector2 inputValue)
